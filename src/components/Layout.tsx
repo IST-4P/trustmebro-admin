@@ -159,13 +159,13 @@ export function Layout({
             <div className="flex items-center gap-3 flex-shrink-0">
               {/* Shop Button */}
               <Link
-                to="/shop"
+                to={`${import.meta.env.VITE_USER_URL || "/"}`}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all shadow-sm hover:shadow-md"
-                title="View Shop"
+                title="Buy"
               >
                 <Store className="w-4 h-4" />
                 <span className="hidden sm:inline text-sm font-medium">
-                  Shop
+                  Buy
                 </span>
               </Link>
 

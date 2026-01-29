@@ -2,16 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { Search, Package, ShoppingCart, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { productApi, orderApi } from "../services/api";
-import type {
-  GetAllProductResponseDto,
-  GetAllOrderResponseDto,
-} from "../types";
+import type { ProductListItem, OrderListItem } from "../types";
 
 export function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [products, setProducts] = useState<GetAllProductResponseDto[]>([]);
-  const [orders, setOrders] = useState<GetAllOrderResponseDto[]>([]);
+  const [products, setProducts] = useState<ProductListItem[]>([]);
+  const [orders, setOrders] = useState<OrderListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -59,11 +56,11 @@ export function GlobalSearch() {
     try {
       setLoading(true);
       const [productsRes, ordersRes] = await Promise.all([
-        productApi.getAll({ page: 1, limit: 5, search: query }),
-        orderApi.getAll({ page: 1, limit: 5, search: query }),
+        productApi.getAll({ page: 1, limit: 10, name: query }),
+        orderApi.getAll({ page: 1, limit: 10, code: query }),
       ]);
-      setProducts(productsRes.data);
-      setOrders(ordersRes.data);
+      setProducts(productsRes.data.products || []);
+      setOrders(ordersRes.data.orders || []);
     } catch (error) {
       console.error("Search failed:", error);
     } finally {
@@ -155,7 +152,10 @@ export function GlobalSearch() {
                           {product.name}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          ${product.basePrice.toFixed(2)}
+                          $
+                          {(product.virtualPrice || product.basePrice).toFixed(
+                            2,
+                          )}
                         </p>
                       </div>
                       <span
@@ -189,10 +189,10 @@ export function GlobalSearch() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {order.code}
+                          {order.shopName}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          ${order.totalPrice.toFixed(2)}
+                          ${order.grandTotal.toFixed(2)}
                         </p>
                       </div>
                       <span

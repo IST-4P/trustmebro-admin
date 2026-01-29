@@ -93,11 +93,10 @@ export function ProductForm() {
   };
 
   const addVariant = () => {
-    // TODO: Update to match new API structure with value/options
-    // setFormData({
-    //   ...formData,
-    //   variants: [...formData.variants, { value: "", options: [""] }],
-    // });
+    setFormData({
+      ...formData,
+      variants: [...formData.variants, { value: "", options: [""] }],
+    });
   };
 
   const removeVariant = (index: number) => {
@@ -118,11 +117,10 @@ export function ProductForm() {
   };
 
   const addAttribute = () => {
-    // TODO: Update to match new API structure with name/value
-    // setFormData({
-    //   ...formData,
-    //   attributes: [...formData.attributes, { name: "", value: "" }],
-    // });
+    setFormData({
+      ...formData,
+      attributes: [...formData.attributes, { name: "", value: "" }],
+    });
   };
 
   const removeAttribute = (index: number) => {
@@ -140,22 +138,6 @@ export function ProductForm() {
     const newAttributes = [...formData.attributes];
     newAttributes[index] = { ...newAttributes[index], [field]: value };
     setFormData({ ...formData, attributes: newAttributes });
-  };
-
-  const addAttributeValue = (attrIndex: number) => {
-    // Not applicable with new API structure
-  };
-
-  const removeAttributeValue = (attrIndex: number, valueIndex: number) => {
-    // Not applicable with new API structure
-  };
-
-  const updateAttributeValue = (
-    attrIndex: number,
-    valueIndex: number,
-    value: string,
-  ) => {
-    // Not applicable with new API structure
   };
 
   if (loading && isEdit) {
@@ -351,25 +333,121 @@ export function ProductForm() {
           </div>
         </div>
 
-        {/* Variants - TODO: Update UI to match new API structure */}
-        {/* <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+        {/* Variants */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Variants
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Variants management needs to be updated to match new API structure (value/options)
-          </p>
-        </div> */}
+          <div className="space-y-4">
+            {formData.variants.map((variant, index) => (
+              <div
+                key={index}
+                className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Variant {index + 1}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => removeVariant(index)}
+                    className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
 
-        {/* Attributes - TODO: Update UI to match new API structure */}
-        {/* <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Variant Name
+                  </label>
+                  <input
+                    type="text"
+                    value={variant.value}
+                    onChange={(e) =>
+                      updateVariant(index, "value", e.target.value)
+                    }
+                    className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., Color, Size"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Options (comma-separated)
+                  </label>
+                  <input
+                    type="text"
+                    value={variant.options.join(", ")}
+                    onChange={(e) =>
+                      updateVariant(
+                        index,
+                        "options",
+                        e.target.value.split(",").map((o) => o.trim()),
+                      )
+                    }
+                    className="w-full px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., Red, Blue, Green"
+                  />
+                </div>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addVariant}
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 rounded-lg transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Add Variant
+            </button>
+          </div>
+        </div>
+
+        {/* Attributes */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Attributes
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Attributes management needs to be updated to match new API structure (name/value pairs)
-          </p>
-        </div> */}
+          <div className="space-y-3">
+            {formData.attributes.map((attribute, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={attribute.name}
+                  onChange={(e) =>
+                    updateAttribute(index, "name", e.target.value)
+                  }
+                  className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Attribute name (e.g., Material)"
+                />
+                <input
+                  type="text"
+                  value={attribute.value}
+                  onChange={(e) =>
+                    updateAttribute(index, "value", e.target.value)
+                  }
+                  className="flex-1 px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Attribute value (e.g., Cotton)"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeAttribute(index)}
+                  className="p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addAttribute}
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 rounded-lg transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Add Attribute
+            </button>
+          </div>
+        </div>
 
         {/* Submit */}
         <div className="flex gap-3">

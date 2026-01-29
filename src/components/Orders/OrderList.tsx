@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Package, Filter } from "lucide-react";
-import type { Order } from "../../types/dto";
-import { ordersApi } from "../../services/api";
-import { mockOrdersData } from "../../services/mockData";
+import type { OrderListItem, OrderStatus } from "../../types";
+import { orderApi } from "../../services/api";
 
 export function OrderList() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -20,25 +19,13 @@ export function OrderList() {
     try {
       setLoading(true);
 
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await ordersApi.getAll({
-      //   page: currentPage,
-      //   limit: 10,
-      //   status: statusFilter !== 'all' ? statusFilter : undefined,
-      // });
-      // setOrders(response.data);
-      // setTotalPages(Math.ceil(response.meta.total / response.meta.limit));
-
-      // Using mock data for now
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const filtered =
-        statusFilter === "all"
-          ? mockOrdersData.data
-          : mockOrdersData.data.filter((o) => o.status === statusFilter);
-      setOrders(filtered);
-      setTotalPages(
-        Math.ceil(mockOrdersData.meta.total / mockOrdersData.meta.limit),
-      );
+      const response = await orderApi.getAll({
+        page: currentPage,
+        limit: 10,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+      });
+      setOrders(response.data.orders);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Failed to load orders:", error);
     } finally {
@@ -48,12 +35,11 @@ export function OrderList() {
 
   const statusOptions = [
     { value: "all", label: "All Orders" },
-    { value: "pending", label: "Pending" },
-    { value: "confirmed", label: "Confirmed" },
-    { value: "processing", label: "Processing" },
-    { value: "shipped", label: "Shipped" },
-    { value: "delivered", label: "Delivered" },
-    { value: "cancelled", label: "Cancelled" },
+    { value: "PENDING", label: "Pending" },
+    { value: "CONFIRMED", label: "Confirmed" },
+    { value: "SHIPPING", label: "Shipping" },
+    { value: "COMPLETED", label: "Completed" },
+    { value: "CANCELLED", label: "Cancelled" },
   ];
 
   return (
@@ -75,7 +61,7 @@ export function OrderList() {
           <select
             value={statusFilter}
             onChange={(e) => {
-              setStatusFilter(e.target.value);
+              setStatusFilter(e.target.value as OrderStatus | "all");
               setCurrentPage(1);
             }}
             className="px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900"
@@ -126,9 +112,6 @@ export function OrderList() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase">
-                      Date
-                    </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase">
                       Actions
                     </th>
@@ -143,41 +126,36 @@ export function OrderList() {
                       <td className="px-6 py-4">
                         <div>
                           <p className="text-sm font-medium text-neutral-900">
-                            {order.userName}
+                            {order.shopName}
                           </p>
                           <p className="text-xs text-neutral-600">
-                            {order.userEmail}
+                            {order.firstProductName}
                           </p>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-neutral-900">
-                        {order.items.length} item
-                        {order.items.length !== 1 ? "s" : ""}
+                        {order.itemTotal} item
+                        {order.itemTotal !== 1 ? "s" : ""}
                       </td>
                       <td className="px-6 py-4 text-sm font-medium text-neutral-900">
-                        ${order.totalPrice.toFixed(2)}
+                        ${order.grandTotal.toFixed(2)}
                       </td>
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                            order.status === "pending"
+                            order.status === "PENDING"
                               ? "bg-yellow-50 text-yellow-700"
-                              : order.status === "confirmed"
+                              : order.status === "CONFIRMED"
                                 ? "bg-blue-50 text-blue-700"
-                                : order.status === "processing"
+                                : order.status === "SHIPPING"
                                   ? "bg-purple-50 text-purple-700"
-                                  : order.status === "shipped"
-                                    ? "bg-indigo-50 text-indigo-700"
-                                    : order.status === "delivered"
-                                      ? "bg-green-50 text-green-700"
-                                      : "bg-red-50 text-red-700"
+                                  : order.status === "COMPLETED"
+                                    ? "bg-green-50 text-green-700"
+                                    : "bg-red-50 text-red-700"
                           }`}
                         >
                           {order.status}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-neutral-600">
-                        {new Date(order.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Link

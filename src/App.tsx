@@ -12,7 +12,6 @@ import { Reviews } from "./pages/Reviews";
 import { Reports } from "./pages/Reports";
 import { Login } from "./pages/Login";
 import { ForgotPassword } from "./pages/ForgotPassword";
-import { Shop } from "./pages/Shop";
 import { Toaster } from "./components/ui/sonner";
 // import { dashboardApi } from "./services/api";
 import { isAuthenticated } from "./utils/auth";
@@ -59,7 +58,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Shop Route (no layout) */}
-        <Route path="/shop" element={<Shop />} />
+        {/* <Route path="/shop" element={<Shop />} /> */}
 
         {/* Protected Routes with Layout */}
         <Route

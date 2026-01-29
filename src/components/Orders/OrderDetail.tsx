@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Package } from "lucide-react";
-import type { Order } from "../../types/dto";
-import { ordersApi } from "../../services/api";
-import { mockOrdersData } from "../../services/mockData";
+import type { OrderDetail, OrderStatus } from "../../types";
+import { orderApi } from "../../services/api";
 
 export function OrderDetail() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
@@ -24,16 +23,8 @@ export function OrderDetail() {
     try {
       setLoading(true);
 
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await ordersApi.getById(id);
-      // setOrder(response.data);
-
-      // Using mock data for now
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const foundOrder = mockOrdersData.data.find((o) => o.id === id);
-      if (foundOrder) {
-        setOrder(foundOrder);
-      }
+      const response = await orderApi.getById(id);
+      setOrder(response.data);
     } catch (error) {
       console.error("Failed to load order:", error);
     } finally {
@@ -41,23 +32,17 @@ export function OrderDetail() {
     }
   };
 
-  const handleStatusUpdate = async (newStatus: Order["status"]) => {
+  const handleStatusUpdate = async (newStatus: OrderStatus) => {
     if (!order) return;
 
     try {
       setUpdating(true);
 
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await ordersApi.updateStatus(order.id, { status: newStatus });
-      // setOrder(response.data);
-
-      // Using mock update for now
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setOrder({
-        ...order,
+      const response = await orderApi.update({
+        id: order.id,
         status: newStatus,
-        updatedAt: new Date().toISOString(),
       });
+      setOrder(response.data);
     } catch (error) {
       console.error("Failed to update order status:", error);
       alert("Failed to update order status");
@@ -89,13 +74,12 @@ export function OrderDetail() {
     );
   }
 
-  const statusOptions: Order["status"][] = [
-    "pending",
-    "confirmed",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
+  const statusOptions: OrderStatus[] = [
+    "PENDING",
+    "CONFIRMED",
+    "SHIPPING",
+    "COMPLETED",
+    "CANCELLED",
   ];
 
   return (
@@ -122,13 +106,13 @@ export function OrderDetail() {
               <h2 className="font-semibold text-neutral-900">Order Items</h2>
             </div>
             <div className="divide-y divide-neutral-200">
-              {order.items.map((item) => (
+              {order.itemsSnapshot.map((item) => (
                 <div
                   key={item.id}
                   className="px-6 py-4 flex items-center gap-4"
                 >
                   <img
-                    src={item.thumbnail}
+                    src={item.productImage}
                     alt={item.productName}
                     className="w-16 h-16 rounded-lg object-cover"
                   />
@@ -136,7 +120,9 @@ export function OrderDetail() {
                     <p className="font-medium text-neutral-900">
                       {item.productName}
                     </p>
-                    <p className="text-sm text-neutral-600">SKU: {item.sku}</p>
+                    <p className="text-sm text-neutral-600">
+                      SKU: {item.skuValue}
+                    </p>
                     <p className="text-sm text-neutral-600">
                       Quantity: {item.quantity}
                     </p>
@@ -151,7 +137,7 @@ export function OrderDetail() {
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-neutral-900">Total</p>
                 <p className="font-semibold text-neutral-900">
-                  ${order.totalPrice.toFixed(2)}
+                  ${order.grandTotal.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -162,7 +148,9 @@ export function OrderDetail() {
             <h2 className="font-semibold text-neutral-900 mb-4">
               Shipping Address
             </h2>
-            <p className="text-neutral-700">{order.shippingAddress}</p>
+            <p className="text-neutral-700">{order.receiver.name}</p>
+            <p className="text-neutral-700">{order.receiver.phone}</p>
+            <p className="text-neutral-700">{order.receiver.address}</p>
           </div>
         </div>
 
@@ -174,12 +162,12 @@ export function OrderDetail() {
             </h2>
             <div className="space-y-3">
               <div>
-                <p className="text-xs text-neutral-500">Name</p>
-                <p className="text-neutral-900">{order.userName}</p>
+                <p className="text-xs text-neutral-500">Receiver Name</p>
+                <p className="text-neutral-900">{order.receiverName}</p>
               </div>
               <div>
-                <p className="text-xs text-neutral-500">Email</p>
-                <p className="text-neutral-900">{order.userEmail}</p>
+                <p className="text-xs text-neutral-500">Receiver Phone</p>
+                <p className="text-neutral-900">{order.receiverPhone}</p>
               </div>
               <div>
                 <p className="text-xs text-neutral-500">User ID</p>
@@ -198,17 +186,15 @@ export function OrderDetail() {
                 <p className="text-xs text-neutral-500 mb-2">Current Status</p>
                 <span
                   className={`inline-flex px-3 py-1 text-sm rounded-full ${
-                    order.status === "pending"
+                    order.status === "PENDING"
                       ? "bg-yellow-50 text-yellow-700"
-                      : order.status === "confirmed"
+                      : order.status === "CONFIRMED"
                         ? "bg-blue-50 text-blue-700"
-                        : order.status === "processing"
+                        : order.status === "SHIPPING"
                           ? "bg-purple-50 text-purple-700"
-                          : order.status === "shipped"
-                            ? "bg-indigo-50 text-indigo-700"
-                            : order.status === "delivered"
-                              ? "bg-green-50 text-green-700"
-                              : "bg-red-50 text-red-700"
+                          : order.status === "COMPLETED"
+                            ? "bg-green-50 text-green-700"
+                            : "bg-red-50 text-red-700"
                   }`}
                 >
                   {order.status}
@@ -222,7 +208,7 @@ export function OrderDetail() {
                 <select
                   value={order.status}
                   onChange={(e) =>
-                    handleStatusUpdate(e.target.value as Order["status"])
+                    handleStatusUpdate(e.target.value as OrderStatus)
                   }
                   disabled={updating}
                   className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 disabled:opacity-50"

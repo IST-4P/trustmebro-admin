@@ -25,11 +25,8 @@ export function ProductForm() {
     description: "",
     sizeGuide: "",
     provinceId: undefined,
-    provinceName: "",
     districtId: undefined,
-    districtName: "",
     wardId: undefined,
-    wardName: "",
     status: "DRAFT",
     categories: [],
     skus: [],
@@ -78,11 +75,8 @@ export function ProductForm() {
         description: product.description || "",
         sizeGuide: product.sizeGuide || "",
         provinceId: product.provinceId,
-        provinceName: product.provinceName || "",
         districtId: product.districtId,
-        districtName: product.districtName || "",
         wardId: product.wardId,
-        wardName: product.wardName || "",
         status: product.status,
         categories: product.categoryIds || [],
         skus:
@@ -457,21 +451,6 @@ export function ProductForm() {
 
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Province Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.provinceName}
-                onChange={(e) =>
-                  setFormData({ ...formData, provinceName: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
                 District ID *
               </label>
               <input
@@ -492,21 +471,6 @@ export function ProductForm() {
 
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">
-                District Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.districtName}
-                onChange={(e) =>
-                  setFormData({ ...formData, districtName: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
                 Ward ID *
               </label>
               <input
@@ -520,21 +484,6 @@ export function ProductForm() {
                       ? parseInt(e.target.value)
                       : undefined,
                   })
-                }
-                className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">
-                Ward Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.wardName}
-                onChange={(e) =>
-                  setFormData({ ...formData, wardName: e.target.value })
                 }
                 className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900"
               />

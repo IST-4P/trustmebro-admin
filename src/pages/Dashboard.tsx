@@ -326,8 +326,8 @@ export function Dashboard() {
                   fill="#8884d8"
                   dataKey="count"
                 >
-                  {orderStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  {orderStats.map((entry) => (
+                    <Cell key={`cell-${entry.status}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip

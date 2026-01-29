@@ -22,7 +22,7 @@ export function ProductList() {
       const response = await productApi.getAll({
         page: currentPage,
         limit: 10,
-        keyword: searchQuery,
+        name: searchQuery,
       });
       setProducts(response.data.products || []);
       setTotalPages(response.data.totalPages || 1);

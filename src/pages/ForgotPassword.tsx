@@ -13,6 +13,7 @@ import {
 } from "../components/ui/card";
 import { toast } from "sonner";
 import { ArrowLeft, Store, Mail, CheckCircle } from "lucide-react";
+import { authApi } from "../services/api";
 
 export function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -29,24 +30,37 @@ export function ForgotPassword() {
 
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await authApi.forgotPassword(email);
       setEmailSent(true);
       toast.success("Email sent successfully!", {
         description: "Check your inbox for password reset instructions",
       });
+    } catch (error) {
+      toast.error("Failed to send reset email", {
+        description:
+          error instanceof Error ? error.message : "Please try again later",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      await authApi.forgotPassword(email);
       toast.success("Email resent!", {
         description: "Please check your inbox again",
       });
+    } catch (error) {
+      toast.error("Failed to resend email", {
+        description:
+          error instanceof Error ? error.message : "Please try again later",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

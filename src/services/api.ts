@@ -44,9 +44,9 @@ const USER_API_URL = normalizeUrl(
 
 // Socket.IO URL (without /api/v1 path since Socket.IO is at root level)
 const SOCKET_IO_URL = normalizeUrl(
-  import.meta.env.VITE_SOCKET_URL || 
-  SELLER_API_URL.replace(/\/api\/v1$/, "") || 
-  "http://localhost:3000"
+  import.meta.env.VITE_SOCKET_URL ||
+    SELLER_API_URL.replace(/\/api\/v1$/, "") ||
+    "http://localhost:3000",
 );
 
 // Helper function for API calls to seller endpoint
@@ -84,16 +84,6 @@ async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
 
   // Parse and validate response
   const data = await response.json();
-
-  // Debug log response shape in development
-  if (import.meta.env.DEV) {
-    console.log(`[API] ${endpoint}:`, {
-      hasData: !!data,
-      isArray: Array.isArray(data),
-      dataKeys: typeof data === "object" ? Object.keys(data) : [],
-      dataType: typeof data,
-    });
-  }
 
   return data;
 }
@@ -388,7 +378,6 @@ export const chatApi = {
       const socket = io(socketUrl, socketOptions);
 
       socket.on("connect", () => {
-
         onConnect?.();
       });
 
@@ -453,7 +442,9 @@ export const chatApi = {
 
     // Set timeout to detect if server doesn't respond
     const timeoutId = setTimeout(() => {
-      console.error("[Chat] ⏰ TIMEOUT: No newMessage event received after 5 seconds");
+      console.error(
+        "[Chat] ⏰ TIMEOUT: No newMessage event received after 5 seconds",
+      );
       console.error("[Chat] 🔍 Possible issues:");
       console.error("  - Server not emitting 'newMessage' event");
       console.error("  - Client not in correct room");
@@ -619,6 +610,19 @@ export const reportApi = {
     return userApiCall<GetReportResponseDto>("/report", {
       method: "POST",
       body: JSON.stringify(data),
+    });
+  },
+};
+
+// ============================================================================
+// Auth API (uses USER API endpoint)
+// ============================================================================
+
+export const authApi = {
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    return userApiCall<{ message: string }>("/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
     });
   },
 };

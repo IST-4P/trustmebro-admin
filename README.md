@@ -44,9 +44,9 @@ cp .env.example .env
 4. Cấu hình environment variables trong `.env`:
 
 ```env
-VITE_SELLER_URL=http://trustmebro-seller.hacmieu.xyz/api/
-VITE_USER_URL=http://trustmebro-user.hacmieu.xyz/api/
-VITE_TUS_ENDPOINT=https://trustmebro-tusd.hacmieu.xyz/files/
+VITE_SELLER_URL=
+VITE_USER_URL=
+VITE_TUS_ENDPOINT=
 ```
 
 5. Chạy development server:
@@ -140,12 +140,6 @@ Project sử dụng shadcn/ui components với customization:
 - Accessible by default
 
 ## 📚 Documentation
-
-Xem thêm tài liệu chi tiết:
-
-- [API Integration Guide](src/API_INTEGRATION_GUIDE.md)
-- [Authentication Guide](src/AUTH_README.md)
-- [Guidelines](src/guidelines/Guidelines.md)
 
 ## 🤝 Contributing
 
