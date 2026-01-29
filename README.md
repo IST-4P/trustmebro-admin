@@ -35,21 +35,7 @@ cd Seller
 npm install
 ```
 
-3. Tạo file `.env` từ `.env.example`:
-
-```bash
-cp .env.example .env
-```
-
-4. Cấu hình environment variables trong `.env`:
-
-```env
-VITE_SELLER_URL=http://trustmebro-seller.hacmieu.xyz/api/
-VITE_USER_URL=http://trustmebro-user.hacmieu.xyz/api/
-VITE_TUS_ENDPOINT=https://trustmebro-tusd.hacmieu.xyz/files/
-```
-
-5. Chạy development server:
+3. Chạy development server:
 
 ```bash
 npm run dev
