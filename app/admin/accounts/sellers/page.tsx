@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { ColumnDef } from "@tantml:stack-table";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
-import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
-import { User } from "@/types";
+import { DataTable } from "@/components/ui/data-table";
 import { mockSellers } from "@/lib/mock-data";
 import { formatDate } from "@/lib/utils";
+import { User } from "@/types";
+import { ColumnDef } from "@tanstack/react-table";
+import { useState } from "react";
 
 export default function SellerAccountsPage() {
   const [sellers] = useState<User[]>(mockSellers);
@@ -21,8 +21,20 @@ export default function SellerAccountsPage() {
       accessorKey: "status",
       header: "Trạng thái",
       cell: ({ row }) => (
-        <Badge variant={row.original.status === "active" ? "success" : row.original.status === "pending" ? "warning" : "destructive"}>
-          {row.original.status === "active" ? "Hoạt động" : row.original.status === "pending" ? "Chờ duyệt" : "Bị khóa"}
+        <Badge
+          variant={
+            row.original.status === "active"
+              ? "success"
+              : row.original.status === "pending"
+                ? "warning"
+                : "destructive"
+          }
+        >
+          {row.original.status === "active"
+            ? "Hoạt động"
+            : row.original.status === "pending"
+              ? "Chờ duyệt"
+              : "Bị khóa"}
         </Badge>
       ),
     },
@@ -39,10 +51,17 @@ export default function SellerAccountsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Tài khoản Người bán</h1>
-          <p className="text-muted-foreground">Quản lý tài khoản người bán hàng</p>
+          <p className="text-muted-foreground">
+            Quản lý tài khoản người bán hàng
+          </p>
         </div>
       </div>
-      <DataTable columns={columns} data={sellers} searchKey="name" searchPlaceholder="Tìm người bán..." />
+      <DataTable
+        columns={columns}
+        data={sellers}
+        searchKey="name"
+        searchPlaceholder="Tìm người bán..."
+      />
     </div>
   );
 }

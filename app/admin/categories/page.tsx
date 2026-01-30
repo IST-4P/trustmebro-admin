@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
-import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
+import { DataTable } from "@/components/ui/data-table";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +11,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,31 +27,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Plus,
-  Pencil,
-  Trash2,
-  MoreVertical,
-  RefreshCw,
-  AlertCircle,
-  Loader2,
-  Image as ImageIcon,
-} from "lucide-react";
-import { formatDate } from "@/lib/utils";
-import { toast } from "sonner";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
+  CategoryListItem,
+  createCategory,
+  deleteCategory,
   getCategories,
   getCategoryById,
-  createCategory,
   updateCategory,
-  deleteCategory,
-  CategoryListItem,
 } from "@/lib/api/categories";
+import { formatDate } from "@/lib/utils";
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  AlertCircle,
+  Image as ImageIcon,
+  Loader2,
+  MoreVertical,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<CategoryListItem[]>([]);
@@ -59,7 +59,8 @@ export default function CategoriesPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<CategoryListItem | null>(null);
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryListItem | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Filter
@@ -85,7 +86,9 @@ export default function CategoriesPage() {
   const fetchAllCategories = async () => {
     try {
       const response = await getCategories();
-      const categoriesData = Array.isArray(response.data?.categories) ? response.data.categories : [];
+      const categoriesData = Array.isArray(response.data?.categories)
+        ? response.data.categories
+        : [];
       setAllCategories(categoriesData);
     } catch (error) {
       console.error("Failed to fetch all categories:", error);
@@ -103,11 +106,16 @@ export default function CategoriesPage() {
       }
 
       const response = await getCategories(params);
-      const categoriesData = Array.isArray(response.data?.categories) ? response.data.categories : [];
+      const categoriesData = Array.isArray(response.data?.categories)
+        ? response.data.categories
+        : [];
       setCategories(categoriesData);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể tải danh sách danh mục";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Không thể tải danh sách danh mục";
       setError(errorMessage);
       toast.error(errorMessage);
       setCategories([]);
@@ -141,7 +149,8 @@ export default function CategoriesPage() {
       fetchCategories();
     } catch (error) {
       console.error("Failed to create category:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể tạo danh mục";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể tạo danh mục";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -170,7 +179,8 @@ export default function CategoriesPage() {
       fetchCategories();
     } catch (error) {
       console.error("Failed to update category:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể cập nhật danh mục";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể cập nhật danh mục";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -192,7 +202,8 @@ export default function CategoriesPage() {
       fetchCategories();
     } catch (error) {
       console.error("Failed to delete category:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể xóa danh mục";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể xóa danh mục";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -256,7 +267,9 @@ export default function CategoriesPage() {
     {
       accessorKey: "name",
       header: "Tên danh mục",
-      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.name}</span>
+      ),
     },
     {
       accessorKey: "createdAt",
@@ -319,8 +332,14 @@ export default function CategoriesPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={fetchCategories} variant="outline" disabled={loading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          <Button
+            onClick={fetchCategories}
+            variant="outline"
+            disabled={loading}
+          >
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
+            />
             Làm mới
           </Button>
           <Button onClick={() => setIsCreateOpen(true)}>
@@ -385,7 +404,9 @@ export default function CategoriesPage() {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="Nhập tên danh mục"
               />
             </div>
@@ -394,7 +415,9 @@ export default function CategoriesPage() {
               <Input
                 id="logo"
                 value={formData.logo}
-                onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, logo: e.target.value })
+                }
                 placeholder="https://example.com/logo.png"
               />
             </div>
@@ -403,7 +426,10 @@ export default function CategoriesPage() {
               <Select
                 value={formData.parentCategoryId || "none"}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, parentCategoryId: value === "none" ? "" : value })
+                  setFormData({
+                    ...formData,
+                    parentCategoryId: value === "none" ? "" : value,
+                  })
                 }
               >
                 <SelectTrigger>
@@ -452,7 +478,9 @@ export default function CategoriesPage() {
               <Input
                 id="edit-name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </div>
             <div className="space-y-2">
@@ -460,7 +488,9 @@ export default function CategoriesPage() {
               <Input
                 id="edit-logo"
                 value={formData.logo}
-                onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, logo: e.target.value })
+                }
                 placeholder="https://example.com/logo.png"
               />
             </div>
@@ -469,7 +499,10 @@ export default function CategoriesPage() {
               <Select
                 value={formData.parentCategoryId || "none"}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, parentCategoryId: value === "none" ? "" : value })
+                  setFormData({
+                    ...formData,
+                    parentCategoryId: value === "none" ? "" : value,
+                  })
                 }
               >
                 <SelectTrigger>
@@ -528,7 +561,11 @@ export default function CategoriesPage() {
             >
               Hủy
             </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={saving}>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={saving}
+            >
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Xóa
             </Button>

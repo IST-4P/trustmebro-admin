@@ -1,12 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
-import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { DataTable } from "@/components/ui/data-table";
 import {
   Dialog,
   DialogContent,
@@ -21,27 +17,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Plus,
-  Pencil,
-  Trash2,
-  MoreVertical,
-  RefreshCw,
-  AlertCircle,
-  Loader2,
-  Image as ImageIcon,
-} from "lucide-react";
-import { formatDate } from "@/lib/utils";
-import { toast } from "sonner";
-import {
-  getBrands,
-  getBrandById,
-  createBrand,
-  updateBrand,
-  deleteBrand,
   BrandListItem,
+  createBrand,
+  deleteBrand,
+  getBrandById,
+  getBrands,
   GetBrandsParams,
+  updateBrand,
 } from "@/lib/api/brands";
+import { formatDate } from "@/lib/utils";
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  AlertCircle,
+  Image as ImageIcon,
+  Loader2,
+  MoreVertical,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function BrandsPage() {
   const [brands, setBrands] = useState<BrandListItem[]>([]);
@@ -52,7 +52,9 @@ export default function BrandsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState<BrandListItem | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<BrandListItem | null>(
+    null,
+  );
   const [saving, setSaving] = useState(false);
 
   // Pagination
@@ -91,9 +93,11 @@ export default function BrandsPage() {
       }
 
       const response = await getBrands(params);
-      const brandsData = Array.isArray(response.data?.brands) ? response.data.brands : [];
+      const brandsData = Array.isArray(response.data?.brands)
+        ? response.data.brands
+        : [];
       setBrands(brandsData);
-      
+
       if (response.data) {
         setPagination((prev) => ({
           ...prev,
@@ -103,7 +107,10 @@ export default function BrandsPage() {
       }
     } catch (error) {
       console.error("Failed to fetch brands:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể tải danh sách thương hiệu";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Không thể tải danh sách thương hiệu";
       setError(errorMessage);
       toast.error(errorMessage);
       setBrands([]);
@@ -141,7 +148,8 @@ export default function BrandsPage() {
       fetchBrands();
     } catch (error) {
       console.error("Failed to create brand:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể tạo thương hiệu";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể tạo thương hiệu";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -169,7 +177,10 @@ export default function BrandsPage() {
       fetchBrands();
     } catch (error) {
       console.error("Failed to update brand:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể cập nhật thương hiệu";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Không thể cập nhật thương hiệu";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -191,7 +202,8 @@ export default function BrandsPage() {
       fetchBrands();
     } catch (error) {
       console.error("Failed to delete brand:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể xóa thương hiệu";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể xóa thương hiệu";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -250,7 +262,9 @@ export default function BrandsPage() {
     {
       accessorKey: "name",
       header: "Tên thương hiệu",
-      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.name}</span>
+      ),
     },
     {
       accessorKey: "createdAt",
@@ -312,7 +326,9 @@ export default function BrandsPage() {
         </div>
         <div className="flex gap-2">
           <Button onClick={fetchBrands} variant="outline" disabled={loading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
+            />
             Làm mới
           </Button>
           <Button onClick={() => setIsCreateOpen(true)}>
@@ -360,8 +376,10 @@ export default function BrandsPage() {
           pageSize: pagination.limit,
           pageCount: pagination.totalPages,
           total: pagination.totalItems,
-          onPageChange: (page: any) => setPagination((prev) => ({ ...prev, page: page + 1 })),
-          onPageSizeChange: (size: any) => setPagination((prev) => ({ ...prev, limit: size, page: 1 })),
+          onPageChange: (page: any) =>
+            setPagination((prev) => ({ ...prev, page: page + 1 })),
+          onPageSizeChange: (size: any) =>
+            setPagination((prev) => ({ ...prev, limit: size, page: 1 })),
         }}
       />
 
@@ -380,7 +398,9 @@ export default function BrandsPage() {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="Nhập tên thương hiệu"
               />
             </div>
@@ -389,7 +409,9 @@ export default function BrandsPage() {
               <Input
                 id="logo"
                 value={formData.logo}
-                onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, logo: e.target.value })
+                }
                 placeholder="https://example.com/logo.png"
               />
             </div>
@@ -418,7 +440,9 @@ export default function BrandsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Sửa thương hiệu</DialogTitle>
-            <DialogDescription>Cập nhật thông tin thương hiệu</DialogDescription>
+            <DialogDescription>
+              Cập nhật thông tin thương hiệu
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -426,7 +450,9 @@ export default function BrandsPage() {
               <Input
                 id="edit-name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </div>
             <div className="space-y-2">
@@ -434,7 +460,9 @@ export default function BrandsPage() {
               <Input
                 id="edit-logo"
                 value={formData.logo}
-                onChange={(e) => setFormData({ ...formData, logo: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, logo: e.target.value })
+                }
                 placeholder="https://example.com/logo.png"
               />
             </div>
@@ -479,7 +507,11 @@ export default function BrandsPage() {
             >
               Hủy
             </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={saving}>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={saving}
+            >
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Xóa
             </Button>

@@ -1,20 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
-import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DataTable } from "@/components/ui/data-table";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 import {
   Dialog,
   DialogContent,
@@ -22,16 +12,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
-import { RefreshCw, Eye, Trash2, Star, Image as ImageIcon, Store } from "lucide-react";
-import { formatDate } from "@/lib/utils";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  getReviews,
-  deleteReview,
-  getRatingStars,
-  ReviewListItem,
-} from "@/lib/api/reviews";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { deleteReview, getReviews, ReviewListItem } from "@/lib/api/reviews";
+import { formatDate } from "@/lib/utils";
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  Eye,
+  Image as ImageIcon,
+  RefreshCw,
+  Star,
+  Store,
+  Trash2,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function ReviewsPage() {
   // State
@@ -48,11 +50,15 @@ export default function ReviewsPage() {
   const [shopIdFilter, setShopIdFilter] = useState<string>("");
 
   // Detail dialog
-  const [selectedReview, setSelectedReview] = useState<ReviewListItem | null>(null);
+  const [selectedReview, setSelectedReview] = useState<ReviewListItem | null>(
+    null,
+  );
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // Delete dialog
-  const [reviewToDelete, setReviewToDelete] = useState<ReviewListItem | null>(null);
+  const [reviewToDelete, setReviewToDelete] = useState<ReviewListItem | null>(
+    null,
+  );
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch reviews
@@ -240,7 +246,9 @@ export default function ReviewsPage() {
           </p>
         </div>
         <Button variant="outline" onClick={fetchReviews} disabled={isLoading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+          />
           Làm mới
         </Button>
       </div>
@@ -323,7 +331,9 @@ export default function ReviewsPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Chi tiết đánh giá</DialogTitle>
-            <DialogDescription>Thông tin chi tiết về đánh giá sản phẩm</DialogDescription>
+            <DialogDescription>
+              Thông tin chi tiết về đánh giá sản phẩm
+            </DialogDescription>
           </DialogHeader>
           {selectedReview && (
             <div className="space-y-6">
@@ -337,7 +347,10 @@ export default function ReviewsPage() {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = "none";
-                        (e.target as HTMLImageElement).parentElement!.innerHTML = `<span class="text-xl font-bold text-primary">${(selectedReview.username || "A")[0].toUpperCase()}</span>`;
+                        (
+                          e.target as HTMLImageElement
+                        ).parentElement!.innerHTML =
+                          `<span class="text-xl font-bold text-primary">${(selectedReview.username || "A")[0].toUpperCase()}</span>`;
                       }}
                     />
                   ) : (
@@ -347,7 +360,9 @@ export default function ReviewsPage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-lg">{selectedReview.username || "Ẩn danh"}</p>
+                  <p className="font-semibold text-lg">
+                    {selectedReview.username || "Ẩn danh"}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {formatDate(selectedReview.createdAt)}
                   </p>
@@ -364,7 +379,9 @@ export default function ReviewsPage() {
 
               {/* Product Info */}
               <div className="border rounded-lg p-4">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Sản phẩm</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+                  Sản phẩm
+                </p>
                 <p className="font-medium">{selectedReview.productName}</p>
                 <p className="text-xs font-mono text-muted-foreground mt-1">
                   ID: {selectedReview.productId}
@@ -373,7 +390,9 @@ export default function ReviewsPage() {
 
               {/* Review Content */}
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Nội dung đánh giá</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
+                  Nội dung đánh giá
+                </p>
                 <p className="text-sm leading-relaxed whitespace-pre-wrap bg-muted/30 p-4 rounded-lg">
                   {selectedReview.content}
                 </p>
@@ -414,7 +433,9 @@ export default function ReviewsPage() {
                 <div className="border-l-4 border-primary bg-primary/5 p-4 rounded-r-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <Store className="h-4 w-4 text-primary" />
-                    <p className="text-sm font-medium text-primary">Phản hồi từ Shop</p>
+                    <p className="text-sm font-medium text-primary">
+                      Phản hồi từ Shop
+                    </p>
                   </div>
                   <p className="text-sm whitespace-pre-wrap">
                     {selectedReview.reply.content}
@@ -434,7 +455,7 @@ export default function ReviewsPage() {
         open={!!reviewToDelete}
         onOpenChange={(open) => !open && setReviewToDelete(null)}
         onConfirm={handleDelete}
-        isLoading={isDeleting}
+        loading={isDeleting}
         title="Xóa đánh giá"
         description="Bạn có chắc chắn muốn xóa đánh giá này? Hành động này không thể hoàn tác."
       />

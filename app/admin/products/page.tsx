@@ -1,25 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, RefreshCw, AlertCircle } from "lucide-react";
-import { Product } from "@/types";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import {
-  getProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  CreateProductData,
-  UpdateProductData,
-  ProductApiResponse,
-} from "@/lib/api/products";
 import { ProductFormDialog } from "@/components/products/product-form-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { DataTable } from "@/components/ui/data-table";
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
+import {
+  createProduct,
+  CreateProductData,
+  deleteProduct,
+  getProducts,
+  ProductApiResponse,
+  updateProduct,
+  UpdateProductData,
+} from "@/lib/api/products";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Product } from "@/types";
+import { ColumnDef } from "@tanstack/react-table";
+import { AlertCircle, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function ProductsPage() {
@@ -31,7 +31,7 @@ export default function ProductsPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  
+
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -47,7 +47,7 @@ export default function ProductsPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await getProducts({
         page: pagination.page,
         limit: pagination.limit,
@@ -56,11 +56,13 @@ export default function ProductsPage() {
       });
 
       // Map API response to Product type
-      const productsData: Product[] = response.data.products.map((p: ProductApiResponse) => ({
-        ...p,
-        brandName: p.brand?.name,
-        shopName: p.shop?.name,
-      }));
+      const productsData: Product[] = response.data.products.map(
+        (p: ProductApiResponse) => ({
+          ...p,
+          brandName: p.brand?.name,
+          shopName: p.shop?.name,
+        }),
+      );
 
       setProducts(productsData);
       setPagination({
@@ -71,7 +73,10 @@ export default function ProductsPage() {
       });
     } catch (error) {
       console.error("Failed to fetch products:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể tải danh sách sản phẩm";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Không thể tải danh sách sản phẩm";
       setError(errorMessage);
       toast.error(errorMessage);
       setProducts([]);
@@ -87,7 +92,8 @@ export default function ProductsPage() {
       fetchProducts();
     } catch (error) {
       console.error("Failed to create product:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể tạo sản phẩm";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể tạo sản phẩm";
       toast.error(errorMessage);
       throw error;
     }
@@ -100,7 +106,8 @@ export default function ProductsPage() {
       fetchProducts();
     } catch (error) {
       console.error("Failed to update product:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể cập nhật sản phẩm";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể cập nhật sản phẩm";
       toast.error(errorMessage);
       throw error;
     }
@@ -117,21 +124,28 @@ export default function ProductsPage() {
     try {
       setDeleteLoading(true);
       // TODO: Replace with actual user ID from auth context
-      await deleteProduct(productToDelete.id, "admin-user-id", productToDelete.shopId);
+      await deleteProduct(
+        productToDelete.id,
+        "admin-user-id",
+        productToDelete.shopId,
+      );
       toast.success("Xóa sản phẩm thành công");
       setDeleteDialogOpen(false);
       setProductToDelete(null);
       fetchProducts();
     } catch (error) {
       console.error("Failed to delete product:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể xóa sản phẩm";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể xóa sản phẩm";
       toast.error(errorMessage);
     } finally {
       setDeleteLoading(false);
     }
   };
 
-  const handleFormSubmit = async (data: CreateProductData | UpdateProductData) => {
+  const handleFormSubmit = async (
+    data: CreateProductData | UpdateProductData,
+  ) => {
     if ("id" in data) {
       await handleUpdateProduct(data);
     } else {
@@ -220,12 +234,15 @@ export default function ProductsPage() {
       header: "Giá",
       cell: ({ row }) => (
         <div>
-          <p className="font-medium">{formatCurrency(row.original.basePrice)}</p>
-          {row.original.virtualPrice && row.original.virtualPrice !== row.original.basePrice && (
-            <p className="text-xs text-muted-foreground line-through">
-              {formatCurrency(row.original.virtualPrice)}
-            </p>
-          )}
+          <p className="font-medium">
+            {formatCurrency(row.original.basePrice)}
+          </p>
+          {row.original.virtualPrice &&
+            row.original.virtualPrice !== row.original.basePrice && (
+              <p className="text-xs text-muted-foreground line-through">
+                {formatCurrency(row.original.virtualPrice)}
+              </p>
+            )}
         </div>
       ),
     },
@@ -287,7 +304,9 @@ export default function ProductsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">Quản lý Sản phẩm</h1>
-            <p className="text-muted-foreground">Quản lý sản phẩm trên nền tảng</p>
+            <p className="text-muted-foreground">
+              Quản lý sản phẩm trên nền tảng
+            </p>
           </div>
         </div>
         <div className="flex items-center justify-center py-12">
@@ -308,14 +327,18 @@ export default function ProductsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">Quản lý Sản phẩm</h1>
-            <p className="text-muted-foreground">Quản lý sản phẩm trên nền tảng</p>
+            <p className="text-muted-foreground">
+              Quản lý sản phẩm trên nền tảng
+            </p>
           </div>
         </div>
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-4 text-center max-w-md">
             <AlertCircle className="h-12 w-12 text-destructive" />
             <div>
-              <h3 className="font-semibold text-lg mb-1">Không thể tải dữ liệu</h3>
+              <h3 className="font-semibold text-lg mb-1">
+                Không thể tải dữ liệu
+              </h3>
               <p className="text-muted-foreground mb-4">{error}</p>
             </div>
             <Button onClick={fetchProducts} variant="outline">
@@ -339,12 +362,10 @@ export default function ProductsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={fetchProducts}
-            disabled={loading}
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          <Button variant="outline" onClick={fetchProducts} disabled={loading}>
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
+            />
             Làm mới
           </Button>
           <Button
@@ -393,7 +414,8 @@ export default function ProductsPage() {
       {/* Pagination Info */}
       {products.length > 0 && (
         <div className="mt-4 text-sm text-muted-foreground text-center">
-          Trang {pagination.page} / {pagination.totalPages} • Tổng {pagination.totalItems} sản phẩm
+          Trang {pagination.page} / {pagination.totalPages} • Tổng{" "}
+          {pagination.totalItems} sản phẩm
         </div>
       )}
 
@@ -415,4 +437,3 @@ export default function ProductsPage() {
     </div>
   );
 }
-

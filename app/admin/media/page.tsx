@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
-import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
-import { Media } from "@/types";
+import { DataTable } from "@/components/ui/data-table";
 import { mockMedia } from "@/lib/mock-data";
 import { formatDate } from "@/lib/utils";
+import { Media } from "@/types";
+import { ColumnDef } from "@tanstack/react-table";
+import { useState } from "react";
 
 export default function MediaPage() {
   const [media] = useState<Media[]>(mockMedia);
@@ -18,7 +18,11 @@ export default function MediaPage() {
       header: "Preview",
       cell: ({ row }) => (
         <div className="h-12 w-12 relative rounded overflow-hidden">
-          <img src={row.original.url} alt={row.original.fileName} className="object-cover" />
+          <img
+            src={row.original.url}
+            alt={row.original.fileName}
+            className="object-cover"
+          />
         </div>
       ),
     },
@@ -26,7 +30,9 @@ export default function MediaPage() {
       accessorKey: "type",
       header: "Loại",
       cell: ({ row }) => (
-        <Badge variant={row.original.type === "image" ? "default" : "secondary"}>
+        <Badge
+          variant={row.original.type === "image" ? "default" : "secondary"}
+        >
           {row.original.type === "image" ? "Ảnh" : "Video"}
         </Badge>
       ),
@@ -51,10 +57,17 @@ export default function MediaPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Quản lý Media</h1>
-          <p className="text-muted-foreground">Quản lý ảnh và video trên hệ thống</p>
+          <p className="text-muted-foreground">
+            Quản lý ảnh và video trên hệ thống
+          </p>
         </div>
       </div>
-      <DataTable columns={columns} data={media} searchKey="fileName" searchPlaceholder="Tìm file..." />
+      <DataTable
+        columns={columns}
+        data={media}
+        searchKey="fileName"
+        searchPlaceholder="Tìm file..."
+      />
     </div>
   );
 }

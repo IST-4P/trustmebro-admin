@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
-import { DataTable } from "@/components/ui/data-table";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { DataTable } from "@/components/ui/data-table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,26 +22,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Eye, Pencil, RefreshCw, AlertCircle, Search, Loader2 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
-import {
-  getUsers,
   getUserById,
-  updateUser,
+  getUsers,
   GetUsersParams,
-  UserListItem,
+  updateUser,
   UserDetail,
   UserGender,
-  UserStatus,
+  UserListItem,
   UserRole,
+  UserStatus,
 } from "@/lib/api/users";
+import { formatDate } from "@/lib/utils";
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  AlertCircle,
+  Eye,
+  Loader2,
+  Pencil,
+  RefreshCw,
+  Search,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function AccountsPage() {
@@ -78,6 +85,7 @@ export default function AccountsPage() {
 
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   const fetchUsers = async () => {
@@ -110,7 +118,10 @@ export default function AccountsPage() {
       });
     } catch (error) {
       console.error("Failed to fetch users:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể tải danh sách người dùng";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Không thể tải danh sách người dùng";
       setError(errorMessage);
       toast.error(errorMessage);
       setUsers([]);
@@ -180,7 +191,8 @@ export default function AccountsPage() {
       fetchUsers();
     } catch (error) {
       console.error("Failed to update user:", error);
-      const errorMessage = error instanceof Error ? error.message : "Không thể cập nhật thông tin";
+      const errorMessage =
+        error instanceof Error ? error.message : "Không thể cập nhật thông tin";
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -310,7 +322,9 @@ export default function AccountsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Quản lý tài khoản</h1>
         <Button onClick={fetchUsers} variant="outline" disabled={loading}>
-          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`}
+          />
           Làm mới
         </Button>
       </div>
@@ -394,8 +408,10 @@ export default function AccountsPage() {
           pageSize: pagination.limit,
           pageCount: pagination.totalPages,
           total: pagination.totalItems,
-          onPageChange: (page: any) => setFilters({ ...filters, page: page + 1 }),
-          onPageSizeChange: (size: any) => setFilters({ ...filters, limit: size, page: 1 }),
+          onPageChange: (page: any) =>
+            setFilters({ ...filters, page: page + 1 }),
+          onPageSizeChange: (size: any) =>
+            setFilters({ ...filters, limit: size, page: 1 }),
         }}
       />
 
@@ -431,29 +447,41 @@ export default function AccountsPage() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Số điện thoại</Label>
-                  <p className="font-medium">{selectedUser.phoneNumber || "-"}</p>
+                  <p className="font-medium">
+                    {selectedUser.phoneNumber || "-"}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Giới tính</Label>
-                  <p className="font-medium">{getGenderText(selectedUser.gender)}</p>
+                  <p className="font-medium">
+                    {getGenderText(selectedUser.gender)}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Ngày sinh</Label>
                   <p className="font-medium">
-                    {selectedUser.birthday ? formatDate(selectedUser.birthday) : "-"}
+                    {selectedUser.birthday
+                      ? formatDate(selectedUser.birthday)
+                      : "-"}
                   </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Vai trò</Label>
-                  <p className="font-medium">{getRoleText(selectedUser.roleName)}</p>
+                  <p className="font-medium">
+                    {getRoleText(selectedUser.roleName)}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Trạng thái</Label>
-                  <div className="mt-1">{getStatusBadge(selectedUser.status)}</div>
+                  <div className="mt-1">
+                    {getStatusBadge(selectedUser.status)}
+                  </div>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Ngày tạo</Label>
-                  <p className="font-medium">{formatDate(selectedUser.createdAt)}</p>
+                  <p className="font-medium">
+                    {formatDate(selectedUser.createdAt)}
+                  </p>
                 </div>
               </div>
             </div>
@@ -466,9 +494,7 @@ export default function AccountsPage() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Chỉnh sửa thông tin</DialogTitle>
-            <DialogDescription>
-              Cập nhật thông tin người dùng
-            </DialogDescription>
+            <DialogDescription>Cập nhật thông tin người dùng</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">

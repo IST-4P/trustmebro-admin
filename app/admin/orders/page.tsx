@@ -1,48 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
-import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Eye,
-  Loader2,
-  RefreshCw,
-  ChevronLeft,
-  ChevronRight,
-  Package,
-  Truck,
-  CreditCard,
-  User,
-  MapPin,
-  Phone,
-  Calendar,
-  Store,
-  Receipt,
-  Save,
-} from "lucide-react";
-import {
-  getOrders,
-  getOrderById,
-  updateOrderStatus,
-  getOrderStatusLabel,
-  getPaymentStatusLabel,
-  getPaymentMethodLabel,
-  OrderListItem,
-  OrderDetail,
-  OrderStatus,
-  GetOrdersParams,
-} from "@/lib/api/orders";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -50,9 +19,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+  getOrderById,
+  getOrders,
+  GetOrdersParams,
+  getOrderStatusLabel,
+  getPaymentMethodLabel,
+  getPaymentStatusLabel,
+  OrderDetail,
+  OrderListItem,
+  OrderStatus,
+  updateOrderStatus,
+} from "@/lib/api/orders";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { ColumnDef } from "@tanstack/react-table";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  CreditCard,
+  Eye,
+  Loader2,
+  MapPin,
+  Package,
+  Phone,
+  Receipt,
+  RefreshCw,
+  Save,
+  Store,
+  Truck,
+  User,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // Fallback image component
 function ProductImage({
@@ -291,7 +291,9 @@ export default function OrdersPage() {
           </p>
         </div>
         <Button variant="outline" onClick={fetchOrders} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+          />
           Làm mới
         </Button>
       </div>
@@ -322,7 +324,9 @@ export default function OrdersPage() {
       {loading && (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <span className="ml-2 text-muted-foreground">Đang tải đơn hàng...</span>
+          <span className="ml-2 text-muted-foreground">
+            Đang tải đơn hàng...
+          </span>
         </div>
       )}
 
@@ -421,7 +425,9 @@ export default function OrdersPage() {
                       </Label>
                       <Select
                         value={newStatus}
-                        onValueChange={(value) => setNewStatus(value as OrderStatus)}
+                        onValueChange={(value) =>
+                          setNewStatus(value as OrderStatus)
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Chọn trạng thái" />
@@ -439,7 +445,10 @@ export default function OrdersPage() {
                     </div>
                     <Button
                       onClick={handleUpdateStatus}
-                      disabled={updatingStatus || newStatus === selectedOrderDetail.status}
+                      disabled={
+                        updatingStatus ||
+                        newStatus === selectedOrderDetail.status
+                      }
                     >
                       {updatingStatus ? (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -451,7 +460,9 @@ export default function OrdersPage() {
                   </div>
                   {newStatus !== selectedOrderDetail.status && (
                     <p className="text-xs text-muted-foreground mt-2">
-                      Thay đổi: {getOrderStatusLabel(selectedOrderDetail.status)} → {getOrderStatusLabel(newStatus as OrderStatus)}
+                      Thay đổi:{" "}
+                      {getOrderStatusLabel(selectedOrderDetail.status)} →{" "}
+                      {getOrderStatusLabel(newStatus as OrderStatus)}
                     </p>
                   )}
                 </CardContent>
@@ -467,7 +478,9 @@ export default function OrdersPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="font-semibold">{selectedOrderDetail.shopName}</p>
+                    <p className="font-semibold">
+                      {selectedOrderDetail.shopName}
+                    </p>
                     <p className="text-xs text-muted-foreground font-mono mt-1">
                       ID: {selectedOrderDetail.shopId.slice(0, 8)}...
                     </p>
@@ -505,7 +518,9 @@ export default function OrdersPage() {
                 <CardContent className="space-y-2">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{selectedOrderDetail.receiverName}</span>
+                    <span className="font-medium">
+                      {selectedOrderDetail.receiverName}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-muted-foreground" />
@@ -513,7 +528,9 @@ export default function OrdersPage() {
                   </div>
                   <div className="flex items-start gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                    <span className="text-sm">{selectedOrderDetail.receiverAddress}</span>
+                    <span className="text-sm">
+                      {selectedOrderDetail.receiverAddress}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -529,23 +546,31 @@ export default function OrdersPage() {
                 <CardContent>
                   <div className="flex flex-wrap gap-4">
                     <div>
-                      <p className="text-xs text-muted-foreground">Phương thức</p>
+                      <p className="text-xs text-muted-foreground">
+                        Phương thức
+                      </p>
                       <p className="font-medium">
-                        {getPaymentMethodLabel(selectedOrderDetail.paymentMethod)}
+                        {getPaymentMethodLabel(
+                          selectedOrderDetail.paymentMethod,
+                        )}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Trạng thái</p>
+                      <p className="text-xs text-muted-foreground">
+                        Trạng thái
+                      </p>
                       <Badge
                         variant={
                           selectedOrderDetail.paymentStatus === "SUCCESS"
                             ? "success"
                             : selectedOrderDetail.paymentStatus === "FAILED"
-                            ? "destructive"
-                            : "warning"
+                              ? "destructive"
+                              : "warning"
                         }
                       >
-                        {getPaymentStatusLabel(selectedOrderDetail.paymentStatus)}
+                        {getPaymentStatusLabel(
+                          selectedOrderDetail.paymentStatus,
+                        )}
                       </Badge>
                     </div>
                   </div>
@@ -575,7 +600,9 @@ export default function OrdersPage() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{item.productName}</p>
+                          <p className="font-medium truncate">
+                            {item.productName}
+                          </p>
                           <p className="text-sm text-muted-foreground">
                             Phân loại: {item.skuValue}
                           </p>
@@ -606,15 +633,27 @@ export default function OrdersPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Tiền hàng</span>
-                      <span>{formatCurrency(selectedOrderDetail.itemTotal)}</span>
+                      <span>
+                        {formatCurrency(selectedOrderDetail.itemTotal)}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Phí vận chuyển</span>
-                      <span>{formatCurrency(selectedOrderDetail.shippingFee || 0)}</span>
+                      <span className="text-muted-foreground">
+                        Phí vận chuyển
+                      </span>
+                      <span>
+                        {formatCurrency(selectedOrderDetail.shippingFee || 0)}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Giảm giá</span>
-                      <span className={selectedOrderDetail.discount > 0 ? "text-green-600" : ""}>
+                      <span
+                        className={
+                          selectedOrderDetail.discount > 0
+                            ? "text-green-600"
+                            : ""
+                        }
+                      >
                         {selectedOrderDetail.discount > 0 ? "-" : ""}
                         {formatCurrency(selectedOrderDetail.discount || 0)}
                       </span>
