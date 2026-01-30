@@ -437,6 +437,108 @@
         "tags": ["User"]
       }
     },
+    "/api/v1/shop": {
+      "get": {
+        "operationId": "ShopController_getManyShops",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "x-nestjs_zod-parent-additional-properties": false,
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "x-nestjs_zod-parent-additional-properties": false,
+            "schema": {
+              "maximum": 9007199254740991,
+              "exclusiveMinimum": 0,
+              "default": 10,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "isOpen",
+            "required": false,
+            "in": "query",
+            "x-nestjs_zod-parent-additional-properties": false,
+            "schema": { "type": "boolean" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetManyShopsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Shop"]
+      }
+    },
+    "/api/v1/shop/{id}": {
+      "get": {
+        "operationId": "ShopController_getShop",
+        "parameters": [
+          {
+            "name": "id",
+            "required": false,
+            "in": "query",
+            "x-nestjs_zod-parent-additional-properties": false,
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "x-nestjs_zod-parent-additional-properties": false,
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "processId",
+            "required": false,
+            "in": "query",
+            "x-nestjs_zod-parent-additional-properties": false,
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GetShopResponseDto" }
+              }
+            }
+          }
+        },
+        "tags": ["Shop"]
+      }
+    },
     "/api/v1/product": {
       "get": {
         "operationId": "ProductController_getManyProducts",
@@ -521,6 +623,12 @@
               "maximum": 9007199254740991,
               "type": "integer"
             }
+          },
+          {
+            "name": "isApproved",
+            "required": false,
+            "in": "query",
+            "schema": { "type": "boolean" }
           },
           {
             "name": "orderBy",
@@ -2180,6 +2288,14 @@
         },
         "tags": ["Report"]
       }
+    },
+    "/api/v1/dashboard": {
+      "get": {
+        "operationId": "DashboardController_dashboard",
+        "parameters": [],
+        "responses": { "200": { "description": "" } },
+        "tags": ["Dashboard"]
+      }
     }
   },
   "info": {
@@ -2219,11 +2335,7 @@
       "LoginPostmanResponseDto": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "object",
-            "properties": {},
-            "x-nestjs_zod-self-required": true
-          },
+          "data": { "type": "object", "properties": {} },
           "message": { "type": "string" },
           "statusCode": { "type": "number" },
           "processId": { "type": "string" },
@@ -2282,8 +2394,7 @@
                 }
               }
             },
-            "required": ["page", "limit", "totalItems", "totalPages", "users"],
-            "x-nestjs_zod-self-required": true
+            "required": ["page", "limit", "totalItems", "totalPages", "users"]
           },
           "message": { "type": "string" },
           "statusCode": { "type": "number" },
@@ -2362,8 +2473,7 @@
               "roleId",
               "roleName"
             ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-self-required": true
+            "x-nestjs_zod-has-null": true
           },
           "message": { "type": "string", "x-nestjs_zod-has-null": true },
           "statusCode": { "type": "number", "x-nestjs_zod-has-null": true },
@@ -2416,6 +2526,143 @@
           }
         },
         "required": ["id"]
+      },
+      "GetManyShopsResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "page": { "type": "number" },
+              "limit": { "type": "number" },
+              "totalItems": { "type": "number" },
+              "totalPages": { "type": "number" },
+              "shops": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "createdById": {
+                      "anyOf": [{ "type": "string" }, { "type": "null" }]
+                    },
+                    "updatedById": {
+                      "anyOf": [{ "type": "string" }, { "type": "null" }]
+                    },
+                    "deletedById": {
+                      "anyOf": [{ "type": "string" }, { "type": "null" }]
+                    },
+                    "deletedAt": { "anyOf": [{}, { "type": "null" }] },
+                    "createdAt": {},
+                    "updatedAt": {},
+                    "ownerId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "description": {
+                      "default": "",
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    "logo": { "type": "string", "format": "uri" },
+                    "address": { "type": "string" },
+                    "phone": { "type": "string", "maxLength": 20 },
+                    "rating": { "default": 0, "type": "number" },
+                    "isOpen": { "default": true, "type": "boolean" }
+                  },
+                  "required": [
+                    "id",
+                    "createdById",
+                    "updatedById",
+                    "deletedById",
+                    "deletedAt",
+                    "createdAt",
+                    "updatedAt",
+                    "ownerId",
+                    "name"
+                  ]
+                }
+              }
+            },
+            "required": ["page", "limit", "totalItems", "totalPages", "shops"],
+            "x-nestjs_zod-has-null": true
+          },
+          "message": { "type": "string", "x-nestjs_zod-has-null": true },
+          "statusCode": { "type": "number", "x-nestjs_zod-has-null": true },
+          "processId": { "type": "string", "x-nestjs_zod-has-null": true },
+          "duration": { "type": "string", "x-nestjs_zod-has-null": true }
+        },
+        "required": ["data"]
+      },
+      "GetShopResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "createdById": {
+                "anyOf": [{ "type": "string" }, { "type": "null" }]
+              },
+              "updatedById": {
+                "anyOf": [{ "type": "string" }, { "type": "null" }]
+              },
+              "deletedById": {
+                "anyOf": [{ "type": "string" }, { "type": "null" }]
+              },
+              "deletedAt": { "anyOf": [{}, { "type": "null" }] },
+              "createdAt": {},
+              "updatedAt": {},
+              "ownerId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+              "description": {
+                "default": "",
+                "type": "string",
+                "maxLength": 500
+              },
+              "logo": { "type": "string", "format": "uri" },
+              "address": { "type": "string" },
+              "phone": { "type": "string", "maxLength": 20 },
+              "rating": { "default": 0, "type": "number" },
+              "isOpen": { "default": true, "type": "boolean" }
+            },
+            "required": [
+              "id",
+              "createdById",
+              "updatedById",
+              "deletedById",
+              "deletedAt",
+              "createdAt",
+              "updatedAt",
+              "ownerId",
+              "name"
+            ],
+            "x-nestjs_zod-has-null": true
+          },
+          "message": { "type": "string", "x-nestjs_zod-has-null": true },
+          "statusCode": { "type": "number", "x-nestjs_zod-has-null": true },
+          "processId": { "type": "string", "x-nestjs_zod-has-null": true },
+          "duration": { "type": "string", "x-nestjs_zod-has-null": true }
+        },
+        "required": ["data"]
       },
       "CreateProductRequestDto": {
         "type": "object",
@@ -2766,6 +3013,16 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
             "x-nestjs_zod-has-null": true,
             "x-nestjs_zod-parent-additional-properties": false
+          },
+          "soldCount": {
+            "type": "number",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
+          },
+          "isApproved": {
+            "type": "boolean",
+            "x-nestjs_zod-has-null": true,
+            "x-nestjs_zod-parent-additional-properties": false
           }
         },
         "required": [
@@ -3049,7 +3306,6 @@
               }
             },
             "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-self-required": false,
             "x-nestjs_zod-parent-additional-properties": false
           },
           "createdById": {
@@ -3100,6 +3356,11 @@
                       "type": "string",
                       "format": "uuid",
                       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "productId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                     }
                   },
                   "required": [
@@ -3117,8 +3378,7 @@
                 }
               }
             },
-            "required": ["page", "limit", "totalItems", "totalPages", "videos"],
-            "x-nestjs_zod-self-required": true
+            "required": ["page", "limit", "totalItems", "totalPages", "videos"]
           },
           "message": { "type": "string" },
           "statusCode": { "type": "number" },
@@ -3156,6 +3416,11 @@
                 "format": "uuid",
                 "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
               },
+              "productId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
               "authorUsername": {
                 "anyOf": [{ "type": "string" }, { "type": "null" }]
               },
@@ -3182,8 +3447,7 @@
               "authorUsername",
               "authorAvatar"
             ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-self-required": true
+            "x-nestjs_zod-has-null": true
           },
           "message": { "type": "string", "x-nestjs_zod-has-null": true },
           "statusCode": { "type": "number", "x-nestjs_zod-has-null": true },
@@ -3323,8 +3587,7 @@
               "totalPages",
               "payments"
             ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-self-required": true
+            "x-nestjs_zod-has-null": true
           },
           "message": { "type": "string", "x-nestjs_zod-has-null": true },
           "statusCode": { "type": "number", "x-nestjs_zod-has-null": true },
@@ -3414,8 +3677,7 @@
               "status",
               "amount"
             ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-self-required": true
+            "x-nestjs_zod-has-null": true
           },
           "message": { "type": "string", "x-nestjs_zod-has-null": true },
           "statusCode": { "type": "number", "x-nestjs_zod-has-null": true },
@@ -3444,6 +3706,7 @@
                       "format": "uuid",
                       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                     },
+                    "code": { "type": "string" },
                     "shopId": {
                       "type": "string",
                       "format": "uuid",
@@ -3454,23 +3717,25 @@
                     "itemTotal": { "type": "number" },
                     "grandTotal": { "type": "number" },
                     "firstProductImage": { "type": "string" },
-                    "firstProductName": { "type": "string" }
+                    "firstProductName": { "type": "string" },
+                    "createdAt": {}
                   },
                   "required": [
                     "id",
+                    "code",
                     "shopId",
                     "shopName",
                     "status",
                     "itemTotal",
                     "grandTotal",
                     "firstProductImage",
-                    "firstProductName"
+                    "firstProductName",
+                    "createdAt"
                   ]
                 }
               }
             },
-            "required": ["page", "limit", "totalItems", "totalPages", "orders"],
-            "x-nestjs_zod-self-required": true
+            "required": ["page", "limit", "totalItems", "totalPages", "orders"]
           },
           "message": { "type": "string" },
           "statusCode": { "type": "number" },
@@ -3607,8 +3872,7 @@
               "itemsSnapshot",
               "firstProductName",
               "firstProductImage"
-            ],
-            "x-nestjs_zod-self-required": true
+            ]
           },
           "message": { "type": "string" },
           "statusCode": { "type": "number" },
@@ -3709,8 +3973,7 @@
               "totalItems",
               "totalPages",
               "promotions"
-            ],
-            "x-nestjs_zod-self-required": true
+            ]
           },
           "message": { "type": "string" },
           "statusCode": { "type": "number" },
@@ -3801,8 +4064,7 @@
               "discountValue",
               "usedCount"
             ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-self-required": true
+            "x-nestjs_zod-has-null": true
           },
           "message": { "type": "string", "x-nestjs_zod-has-null": true },
           "statusCode": { "type": "number", "x-nestjs_zod-has-null": true },
@@ -3970,8 +4232,7 @@
               "discountValue",
               "usedCount"
             ],
-            "x-nestjs_zod-has-null": true,
-            "x-nestjs_zod-self-required": true
+            "x-nestjs_zod-has-null": true
           },
           "message": { "type": "string", "x-nestjs_zod-has-null": true },
           "statusCode": { "type": "number", "x-nestjs_zod-has-null": true },
@@ -4190,8 +4451,7 @@
                 ]
               }
             },
-            "required": ["page", "limit", "totalItems", "totalPages"],
-            "x-nestjs_zod-self-required": true
+            "required": ["page", "limit", "totalItems", "totalPages"]
           },
           "message": { "type": "string" },
           "statusCode": { "type": "number" },
@@ -4203,11 +4463,7 @@
       "MessageResponseDto": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "object",
-            "properties": {},
-            "x-nestjs_zod-self-required": true
-          },
+          "data": { "type": "object", "properties": {} },
           "message": { "type": "string" },
           "statusCode": { "type": "number" },
           "processId": { "type": "string" },
@@ -4272,14 +4528,7 @@
                 }
               }
             },
-            "required": [
-              "page",
-              "limit",
-              "totalItems",
-              "totalPages",
-              "reports"
-            ],
-            "x-nestjs_zod-self-required": true
+            "required": ["page", "limit", "totalItems", "totalPages", "reports"]
           },
           "message": { "type": "string" },
           "statusCode": { "type": "number" },

@@ -1,18 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { ColumnDef } from "@tanstack/react-table";
 import { Breadcrumb } from "@/components/layout/breadcrumb";
-import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DataTable } from "@/components/ui/data-table";
 import {
   Dialog,
   DialogContent,
@@ -21,18 +12,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatCurrency, formatDate } from "@/lib/utils";
-import { toast } from "sonner";
-import { RefreshCw, Eye, CheckCircle, XCircle } from "lucide-react";
 import {
-  getPayments,
-  updatePaymentStatus,
-  getPaymentStatusLabel,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   getPaymentMethodLabel,
+  getPayments,
+  getPaymentStatusLabel,
   PaymentListItem,
-  PaymentStatus,
   PaymentMethod,
+  PaymentStatus,
+  updatePaymentStatus,
 } from "@/lib/api/payments";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { ColumnDef } from "@tanstack/react-table";
+import { CheckCircle, RefreshCw, XCircle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function PaymentsPage() {
   // State
@@ -48,12 +48,14 @@ export default function PaymentsPage() {
   const [methodFilter, setMethodFilter] = useState<string>("all");
 
   // Detail dialog
-  const [selectedPayment, setSelectedPayment] = useState<PaymentListItem | null>(null);
+  const [selectedPayment, setSelectedPayment] =
+    useState<PaymentListItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   // Update status dialog
   const [isUpdateStatusOpen, setIsUpdateStatusOpen] = useState(false);
-  const [paymentToUpdate, setPaymentToUpdate] = useState<PaymentListItem | null>(null);
+  const [paymentToUpdate, setPaymentToUpdate] =
+    useState<PaymentListItem | null>(null);
   const [newStatus, setNewStatus] = useState<PaymentStatus>("PENDING");
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -158,13 +160,18 @@ export default function PaymentsPage() {
       cell: ({ row }) => {
         const orderIds = row.original.orderId;
         // Ensure orderIds is an array
-        const orderIdArray = Array.isArray(orderIds) ? orderIds : (orderIds ? [orderIds] : []);
-        if (orderIdArray.length === 0) return <span className="text-muted-foreground">-</span>;
+        const orderIdArray = Array.isArray(orderIds)
+          ? orderIds
+          : orderIds
+            ? [orderIds]
+            : [];
+        if (orderIdArray.length === 0)
+          return <span className="text-muted-foreground">-</span>;
         return (
           <div className="flex flex-col gap-1">
             {orderIdArray.slice(0, 2).map((id, index) => (
               <span key={index} className="font-mono text-xs">
-                {typeof id === 'string' ? `${id.slice(0, 8)}...` : '-'}
+                {typeof id === "string" ? `${id.slice(0, 8)}...` : "-"}
               </span>
             ))}
             {orderIdArray.length > 2 && (
@@ -215,17 +222,6 @@ export default function PaymentsPage() {
         const payment = row.original;
         return (
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setSelectedPayment(payment);
-                setIsDetailOpen(true);
-              }}
-              title="Xem chi tiết"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
             {payment.status === "PENDING" && (
               <>
                 <Button
@@ -273,7 +269,9 @@ export default function PaymentsPage() {
           </p>
         </div>
         <Button variant="outline" onClick={fetchPayments} disabled={isLoading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+          />
           Làm mới
         </Button>
       </div>
@@ -359,7 +357,9 @@ export default function PaymentsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Mã thanh toán</p>
-                  <p className="font-mono font-medium">{selectedPayment.code}</p>
+                  <p className="font-mono font-medium">
+                    {selectedPayment.code}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">ID</p>
@@ -394,29 +394,39 @@ export default function PaymentsPage() {
                 <p className="font-mono text-sm">{selectedPayment.userId}</p>
               </div>
 
-              {selectedPayment.orderId && selectedPayment.orderId.length > 0 && (
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Đơn hàng liên quan ({selectedPayment.orderId.length})
-                  </p>
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {selectedPayment.orderId.map((id, index) => (
-                      <p key={index} className="font-mono text-xs bg-muted p-1 rounded">
-                        {id}
-                      </p>
-                    ))}
+              {selectedPayment.orderId &&
+                selectedPayment.orderId.length > 0 && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Đơn hàng liên quan ({selectedPayment.orderId.length})
+                    </p>
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {selectedPayment.orderId.map((id, index) => (
+                        <p
+                          key={index}
+                          className="font-mono text-xs bg-muted p-1 rounded"
+                        >
+                          {id}
+                        </p>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               <div className="grid grid-cols-2 gap-4 pt-2 border-t">
                 <div>
                   <p className="text-sm text-muted-foreground">Ngày tạo</p>
-                  <p className="text-sm">{formatDate(selectedPayment.createdAt)}</p>
+                  <p className="text-sm">
+                    {formatDate(selectedPayment.createdAt)}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Cập nhật lần cuối</p>
-                  <p className="text-sm">{formatDate(selectedPayment.updatedAt)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Cập nhật lần cuối
+                  </p>
+                  <p className="text-sm">
+                    {formatDate(selectedPayment.updatedAt)}
+                  </p>
                 </div>
               </div>
 

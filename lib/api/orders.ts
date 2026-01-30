@@ -15,6 +15,7 @@ export type PaymentMethod = "COD" | "WALLET" | "ONLINE";
 
 export interface OrderListItem {
   id: string;
+  code: string;
   shopId: string;
   shopName: string;
   status: OrderStatus;
@@ -114,11 +115,11 @@ export interface UpdateOrderStatusData {
  * GET /order - Lấy danh sách đơn hàng với pagination và filters
  */
 export async function getOrders(
-  params?: GetOrdersParams
+  params?: GetOrdersParams,
 ): Promise<GetManyOrdersResponse> {
   const response = await axiosInstance.get<GetManyOrdersResponse>(
     "/api/v1/order",
-    { params }
+    { params },
   );
   return response.data;
 }
@@ -128,7 +129,7 @@ export async function getOrders(
  */
 export async function getOrderById(orderId: string): Promise<GetOrderResponse> {
   const response = await axiosInstance.get<GetOrderResponse>(
-    `/api/v1/order/${orderId}`
+    `/api/v1/order/${orderId}`,
   );
   return response.data;
 }
@@ -137,7 +138,7 @@ export async function getOrderById(orderId: string): Promise<GetOrderResponse> {
  * PUT /order - Cập nhật trạng thái đơn hàng
  */
 export async function updateOrderStatus(
-  data: UpdateOrderStatusData
+  data: UpdateOrderStatusData,
 ): Promise<void> {
   await axiosInstance.put("/api/v1/order", data);
 }
@@ -147,7 +148,7 @@ export async function updateOrderStatus(
  */
 export async function cancelOrder(
   orderId: string,
-  shopId?: string
+  shopId?: string,
 ): Promise<void> {
   await axiosInstance.delete(`/api/v1/order/${orderId}`, {
     params: shopId ? { shopId } : undefined,

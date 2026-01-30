@@ -169,7 +169,7 @@ export default function CategoriesPage() {
       await updateCategory({
         id: selectedCategory.id,
         name: formData.name,
-        logo: formData.logo || undefined,
+        logo: formData.logo || null,
         parentCategoryId: formData.parentCategoryId || null,
       });
 

@@ -205,32 +205,32 @@ export default function OrdersPage() {
 
   const columns: ColumnDef<OrderListItem>[] = [
     {
+      accessorKey: "code",
+      header: "Mã đơn",
+      cell: ({ row }) => (
+        <span className="font-mono text-xs font-semibold">
+          {row.original.code}
+        </span>
+      ),
+    },
+    {
       accessorKey: "firstProductImage",
       header: "Sản phẩm",
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
-          <div className="relative h-12 w-12 overflow-hidden rounded-md border">
+          <div className="relative h-12 w-12 overflow-hidden rounded-md border text-muted-foreground flex items-center justify-center bg-muted">
             <ProductImage
               src={row.original.firstProductImage}
               alt={row.original.firstProductName}
-              className="h-full w-full"
+              className="h-full w-full object-cover"
             />
           </div>
           <div className="max-w-[200px]">
-            <p className="truncate font-medium text-sm">
+            <p className="truncate font-medium text-sm text-foreground">
               {row.original.firstProductName}
             </p>
           </div>
         </div>
-      ),
-    },
-    {
-      accessorKey: "id",
-      header: "Mã đơn",
-      cell: ({ row }) => (
-        <span className="font-mono text-xs">
-          {row.original.id.slice(0, 8)}...
-        </span>
       ),
     },
     {

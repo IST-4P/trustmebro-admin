@@ -369,8 +369,6 @@ export default function BrandsPage() {
         columns={columns}
         data={brands}
         loading={loading}
-        searchKey="name"
-        searchPlaceholder="Tìm thương hiệu..."
         pagination={{
           pageIndex: pagination.page - 1,
           pageSize: pagination.limit,

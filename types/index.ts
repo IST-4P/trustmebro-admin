@@ -1,6 +1,6 @@
 // User & Auth Types
-export type UserRole = 'admin' | 'seller' | 'buyer';
-export type UserStatus = 'active' | 'banned' | 'pending';
+export type UserRole = "admin" | "seller" | "buyer";
+export type UserStatus = "active" | "banned" | "pending";
 
 export interface User {
   id: string;
@@ -15,7 +15,7 @@ export interface User {
 }
 
 // Category Types
-export type CategoryStatus = 'active' | 'hidden';
+export type CategoryStatus = "active" | "hidden";
 
 export interface Category {
   id: string;
@@ -32,7 +32,7 @@ export interface Category {
 }
 
 // Brand Types
-export type BrandStatus = 'active' | 'hidden';
+export type BrandStatus = "active" | "hidden";
 
 export interface Brand {
   id: string;
@@ -45,7 +45,7 @@ export interface Brand {
 }
 
 // Product Types
-export type ProductStatus = 'ACTIVE' | 'INACTIVE' | 'BANNED' | 'DRAFT';
+export type ProductStatus = "ACTIVE" | "INACTIVE" | "BANNED" | "DRAFT";
 
 export interface ProductVariant {
   value: string;
@@ -55,7 +55,7 @@ export interface ProductVariant {
 export interface ProductSKU {
   id?: string;
   value: string;
-  quantity: number;
+  stock: number;
   price: number;
 }
 
@@ -120,8 +120,8 @@ export interface ProductsData {
 }
 
 // Shop Types
-export type ShopStatus = 'active' | 'suspended' | 'pending';
-export type ShopVerification = 'verified' | 'unverified';
+export type ShopStatus = "active" | "suspended" | "pending";
+export type ShopVerification = "verified" | "unverified";
 
 export interface Shop {
   id: string;
@@ -141,16 +141,20 @@ export interface Shop {
 }
 
 // Order Types
-export type OrderStatus = 
-  | 'pending' 
-  | 'confirmed' 
-  | 'shipping' 
-  | 'delivered' 
-  | 'cancelled' 
-  | 'returned';
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "shipping"
+  | "delivered"
+  | "cancelled"
+  | "returned";
 
-export type PaymentStatus = 'unpaid' | 'paid' | 'failed' | 'refunded';
-export type PaymentMethod = 'cod' | 'bank_transfer' | 'e_wallet' | 'credit_card';
+export type PaymentStatus = "unpaid" | "paid" | "failed" | "refunded";
+export type PaymentMethod =
+  | "cod"
+  | "bank_transfer"
+  | "e_wallet"
+  | "credit_card";
 
 export interface OrderItem {
   productId: string;
@@ -201,8 +205,8 @@ export interface Payment {
 }
 
 // Promotion Types
-export type PromotionStatus = 'active' | 'inactive' | 'expired';
-export type DiscountType = 'percent' | 'fixed';
+export type PromotionStatus = "active" | "inactive" | "expired";
+export type DiscountType = "percent" | "fixed";
 
 export interface Promotion {
   id: string;
@@ -220,8 +224,8 @@ export interface Promotion {
 }
 
 // Review Types
-export type ReviewStatus = 'visible' | 'hidden' | 'reported';
-export type ReviewType = 'product' | 'shop';
+export type ReviewStatus = "visible" | "hidden" | "reported";
+export type ReviewType = "product" | "shop";
 
 export interface Review {
   id: string;
@@ -238,8 +242,8 @@ export interface Review {
 }
 
 // Media Types
-export type MediaType = 'image' | 'video';
-export type MediaStatus = 'active' | 'hidden';
+export type MediaType = "image" | "video";
+export type MediaStatus = "active" | "hidden";
 
 export interface Media {
   id: string;
@@ -256,7 +260,7 @@ export interface Media {
 }
 
 // Log Types
-export type LogLevel = 'info' | 'warning' | 'error' | 'critical';
+export type LogLevel = "info" | "warning" | "error" | "critical";
 
 export interface Log {
   id: string;
@@ -274,7 +278,7 @@ export interface KPICard {
   title: string;
   value: number;
   change: number;
-  changeType: 'increase' | 'decrease';
+  changeType: "increase" | "decrease";
   icon: string;
 }
 

@@ -1,6 +1,5 @@
 import axiosInstance from "@/lib/axios";
 
-// ===== TYPES =====
 export interface ProductVariant {
   value: string;
   options: string[];
@@ -9,10 +8,9 @@ export interface ProductVariant {
 export interface ProductSKU {
   id?: string;
   value: string;
-  quantity: number;
   price: number;
+  stock: number;
   image?: string;
-  stock?: number;
 }
 
 export interface GetProductsParams {
@@ -30,11 +28,16 @@ export interface GetProductsParams {
   limit?: number;
 }
 
+export interface ProductAttribute {
+  name: string;
+  value: string;
+}
+
 export interface CreateProductData {
   name: string;
   basePrice: number;
   virtualPrice?: number;
-  brandId: string;
+  brandId?: string | null;
   images: string[];
   variants?: ProductVariant[];
   shopId: string;
@@ -49,10 +52,16 @@ export interface CreateProductData {
   status?: "ACTIVE" | "INACTIVE" | "BANNED" | "DRAFT";
   categories: string[];
   skus: ProductSKU[];
+  attributes?: ProductAttribute[];
+  isApproved?: boolean;
+  createdById?: string | null;
+  updatedById?: string | null;
 }
 
 export interface UpdateProductData extends Partial<CreateProductData> {
   id: string;
+  soldCount?: number;
+  processId?: string;
 }
 
 // API Response types matching backend schema
@@ -86,8 +95,17 @@ export interface ProductApiResponse {
   categories?: Array<{
     id: string;
     name: string;
+    logo?: string;
   }>;
   skus?: ProductSKU[];
+  attributes?: ProductAttribute[];
+  isApproved?: boolean;
+  isHidden?: boolean;
+  soldCount?: number;
+  viewCount?: number;
+  likeCount?: number;
+  ratingCount?: number;
+  averageRate?: number;
   createdAt: string;
   updatedAt: string;
   createdById?: string;
@@ -130,7 +148,7 @@ export interface ApiErrorResponse {
  * GET /product - Lấy danh sách sản phẩm với pagination và filters
  */
 export async function getProducts(
-  params?: GetProductsParams
+  params?: GetProductsParams,
 ): Promise<GetProductsResponse> {
   const searchParams = new URLSearchParams();
 
@@ -155,7 +173,9 @@ export async function getProducts(
     return response.data;
   } catch (error: any) {
     console.error("getProducts error:", error);
-    throw new Error(error.response?.data?.message || "Failed to fetch products");
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch products",
+    );
   }
 }
 
@@ -163,10 +183,12 @@ export async function getProducts(
  * GET /api/v1/product/{id} - Lấy chi tiết một sản phẩm
  */
 export async function getProductById(
-  id: string
+  id: string,
 ): Promise<GetProductByIdResponse> {
   try {
-    const response = await axiosInstance.get<GetProductByIdResponse>(`/api/v1/product/${id}`);
+    const response = await axiosInstance.get<GetProductByIdResponse>(
+      `/api/v1/product/${id}`,
+    );
     return response.data;
   } catch (error: any) {
     console.error("getProductById error:", error);
@@ -178,14 +200,19 @@ export async function getProductById(
  * POST /api/v1/product - Tạo sản phẩm mới
  */
 export async function createProduct(
-  data: CreateProductData
+  data: CreateProductData,
 ): Promise<GetProductByIdResponse> {
   try {
-    const response = await axiosInstance.post<GetProductByIdResponse>('/api/v1/product', data);
+    const response = await axiosInstance.post<GetProductByIdResponse>(
+      "/api/v1/product",
+      data,
+    );
     return response.data;
   } catch (error: any) {
     console.error("createProduct error:", error);
-    throw new Error(error.response?.data?.message || "Failed to create product");
+    throw new Error(
+      error.response?.data?.message || "Failed to create product",
+    );
   }
 }
 
@@ -193,14 +220,19 @@ export async function createProduct(
  * PUT /api/v1/product - Cập nhật sản phẩm
  */
 export async function updateProduct(
-  data: UpdateProductData
+  data: UpdateProductData,
 ): Promise<GetProductByIdResponse> {
   try {
-    const response = await axiosInstance.put<GetProductByIdResponse>('/api/v1/product', data);
+    const response = await axiosInstance.put<GetProductByIdResponse>(
+      "/api/v1/product",
+      data,
+    );
     return response.data;
   } catch (error: any) {
     console.error("updateProduct error:", error);
-    throw new Error(error.response?.data?.message || "Failed to update product");
+    throw new Error(
+      error.response?.data?.message || "Failed to update product",
+    );
   }
 }
 
@@ -210,15 +242,20 @@ export async function updateProduct(
 export async function deleteProduct(
   id: string,
   deletedById: string,
-  shopId: string
+  shopId: string,
 ): Promise<{ message: string }> {
   try {
-    const response = await axiosInstance.delete<{ message: string }>(`/api/v1/product/${id}`, {
-      data: { deletedById, shopId }
-    });
+    const response = await axiosInstance.delete<{ message: string }>(
+      `/api/v1/product/${id}`,
+      {
+        data: { deletedById, shopId },
+      },
+    );
     return response.data;
   } catch (error: any) {
     console.error("deleteProduct error:", error);
-    throw new Error(error.response?.data?.message || "Failed to delete product");
+    throw new Error(
+      error.response?.data?.message || "Failed to delete product",
+    );
   }
 }

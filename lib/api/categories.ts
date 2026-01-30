@@ -60,9 +60,9 @@ export interface CreateCategoryData {
 
 export interface UpdateCategoryData {
   id: string;
-  name?: string;
-  logo?: string;
-  updatedById?: string;
+  name?: string | null;
+  logo?: string | null;
+  updatedById?: string | null;
   parentCategoryId?: string | null;
   processId?: string;
 }
@@ -79,10 +79,15 @@ export interface DeleteCategoryParams {
  * Lấy danh sách categories
  * GET /api/v1/category
  */
-export async function getCategories(params?: GetCategoriesParams): Promise<GetManyCategoriesResponse> {
-  const response = await axiosInstance.get<GetManyCategoriesResponse>("/api/v1/category", {
-    params,
-  });
+export async function getCategories(
+  params?: GetCategoriesParams,
+): Promise<GetManyCategoriesResponse> {
+  const response = await axiosInstance.get<GetManyCategoriesResponse>(
+    "/api/v1/category",
+    {
+      params,
+    },
+  );
   return response.data;
 }
 
@@ -90,10 +95,16 @@ export async function getCategories(params?: GetCategoriesParams): Promise<GetMa
  * Lấy chi tiết category theo ID
  * GET /api/v1/category/{id}
  */
-export async function getCategoryById(id: string, processId?: string): Promise<GetCategoryResponse> {
-  const response = await axiosInstance.get<GetCategoryResponse>(`/api/v1/category/${id}`, {
-    params: processId ? { processId } : undefined,
-  });
+export async function getCategoryById(
+  id: string,
+  processId?: string,
+): Promise<GetCategoryResponse> {
+  const response = await axiosInstance.get<GetCategoryResponse>(
+    `/api/v1/category/${id}`,
+    {
+      params: processId ? { processId } : undefined,
+    },
+  );
   return response.data;
 }
 
@@ -101,8 +112,13 @@ export async function getCategoryById(id: string, processId?: string): Promise<G
  * Tạo category mới
  * POST /api/v1/category
  */
-export async function createCategory(data: CreateCategoryData): Promise<GetCategoryResponse> {
-  const response = await axiosInstance.post<GetCategoryResponse>("/api/v1/category", data);
+export async function createCategory(
+  data: CreateCategoryData,
+): Promise<GetCategoryResponse> {
+  const response = await axiosInstance.post<GetCategoryResponse>(
+    "/api/v1/category",
+    data,
+  );
   return response.data;
 }
 
@@ -110,8 +126,13 @@ export async function createCategory(data: CreateCategoryData): Promise<GetCateg
  * Cập nhật category
  * PUT /api/v1/category
  */
-export async function updateCategory(data: UpdateCategoryData): Promise<GetCategoryResponse> {
-  const response = await axiosInstance.put<GetCategoryResponse>("/api/v1/category", data);
+export async function updateCategory(
+  data: UpdateCategoryData,
+): Promise<GetCategoryResponse> {
+  const response = await axiosInstance.put<GetCategoryResponse>(
+    "/api/v1/category",
+    data,
+  );
   return response.data;
 }
 
@@ -119,13 +140,18 @@ export async function updateCategory(data: UpdateCategoryData): Promise<GetCateg
  * Xóa category
  * DELETE /api/v1/category/{id}
  */
-export async function deleteCategory(params: DeleteCategoryParams): Promise<GetCategoryResponse> {
+export async function deleteCategory(
+  params: DeleteCategoryParams,
+): Promise<GetCategoryResponse> {
   const { id, deletedById, processId } = params;
-  const response = await axiosInstance.delete<GetCategoryResponse>(`/api/v1/category/${id}`, {
-    params: {
-      deletedById,
-      processId,
+  const response = await axiosInstance.delete<GetCategoryResponse>(
+    `/api/v1/category/${id}`,
+    {
+      params: {
+        deletedById,
+        processId,
+      },
     },
-  });
+  );
   return response.data;
 }
