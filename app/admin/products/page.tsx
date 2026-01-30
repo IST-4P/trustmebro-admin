@@ -408,6 +408,22 @@ export default function ProductsPage() {
           data={products}
           searchKey="name"
           searchPlaceholder="Tìm sản phẩm..."
+          pagination={{
+            pageIndex: pagination.page - 1,
+            pageSize: pagination.limit,
+            pageCount: pagination.totalPages,
+            total: pagination.totalItems,
+            onPageChange: (newPageIndex) => {
+              setPagination((prev) => ({ ...prev, page: newPageIndex + 1 }));
+            },
+            onPageSizeChange: (newPageSize) => {
+              setPagination((prev) => ({
+                ...prev,
+                limit: newPageSize,
+                page: 1,
+              }));
+            },
+          }}
         />
       )}
 
