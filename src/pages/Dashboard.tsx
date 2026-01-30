@@ -28,8 +28,10 @@ import {
   SkeletonChart,
   SkeletonTable,
 } from "../components/ui/skeleton-card";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function Dashboard() {
+  const { t } = useLanguage();
   const [stats, setStats] = useState<DashboardData | null>(null);
   const [recentOrders, setRecentOrders] = useState<OrderListItem[]>([]);
   const [recentReviews, setRecentReviews] = useState<ReviewItem[]>([]);
@@ -82,7 +84,6 @@ export function Dashboard() {
       const pendingOrders = orderData.pendingOrders || 0;
       const confirmedOrders = orderData.confirmedOrders || 0;
       const completedOrders = orderData.completedOrders || 0;
-
 
       const stats = [
         { status: "PENDING", count: pendingOrders, color: "#eab308" },

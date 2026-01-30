@@ -1,8 +1,23 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Plus, X } from "lucide-react";
-import { productApi } from "../services/api";
-import type { CreateProductDto, ProductStatus, ProductVariant } from "../types";
+import {
+  productApi,
+  locationApi,
+  categoryApi,
+  brandApi,
+} from "../services/api";
+import type {
+  CreateProductDto,
+  ProductStatus,
+  ProductVariant,
+  Province,
+  District,
+  Ward,
+  ProductCategory,
+  Brand,
+} from "../types";
+import { generateSKUs } from "../utils/product";
 
 export function ProductForm() {
   const { id } = useParams();
@@ -10,6 +25,17 @@ export function ProductForm() {
   const isEdit = Boolean(id);
 
   const [loading, setLoading] = useState(false);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [wards, setWards] = useState<Ward[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [selectedLevel0Category, setSelectedLevel0Category] = useState<
+    string | null
+  >(null);
+  const [level1Categories, setLevel1Categories] = useState<ProductCategory[]>(
+    [],
+  );
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [formData, setFormData] = useState<CreateProductDto>({
     name: "",
     basePrice: 0,
@@ -20,19 +46,138 @@ export function ProductForm() {
     description: "",
     sizeGuide: "",
     provinceId: undefined,
+    provinceName: undefined,
     districtId: undefined,
+    districtName: undefined,
     wardId: undefined,
+    wardName: undefined,
     status: "DRAFT",
     categories: [],
     skus: [],
     attributes: [],
   });
 
+  // Load provinces on mount
+  useEffect(() => {
+    loadProvinces();
+    loadCategories();
+    loadBrands();
+  }, []);
+
+  // Load districts when province changes
+  useEffect(() => {
+    if (formData.provinceId) {
+      loadDistricts(formData.provinceId);
+    } else {
+      setDistricts([]);
+      setWards([]);
+    }
+  }, [formData.provinceId]);
+
+  // Load wards when district changes
+  useEffect(() => {
+    if (formData.districtId) {
+      loadWards(formData.districtId);
+    } else {
+      setWards([]);
+    }
+  }, [formData.districtId]);
+
+  const loadProvinces = async () => {
+    try {
+      const response = await locationApi.getProvinces();
+      setProvinces(response.data || []);
+    } catch (error) {
+      console.error("Failed to load provinces:", error);
+    }
+  };
+
+  const loadDistricts = async (provinceId: number) => {
+    try {
+      const response = await locationApi.getDistricts(provinceId);
+      setDistricts(response.data || []);
+    } catch (error) {
+      console.error("Failed to load districts:", error);
+    }
+  };
+
+  const loadWards = async (districtId: number) => {
+    try {
+      const response = await locationApi.getWards(districtId);
+      setWards(response.data || []);
+    } catch (error) {
+      console.error("Failed to load wards:", error);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const response = await categoryApi.getAll();
+      const allCategories = response.data?.categories || [];
+      // Chỉ lấy categories level 0
+      const level0Categories = allCategories.filter((c) => c.level === 0);
+      setCategories(level0Categories);
+    } catch (error) {
+      console.error("Failed to load categories:", error);
+    }
+  };
+
+  const loadLevel1Categories = async (parentId: string) => {
+    try {
+      // Call API với query param parentCategoryId để lấy level 1 categories
+      const response = await categoryApi.getAll({ parentCategoryId: parentId });
+      const childCategories = response.data?.categories || [];
+      console.log("Level 1 categories loaded:", childCategories);
+      setLevel1Categories(childCategories);
+    } catch (error) {
+      console.error("Failed to load level 1 categories:", error);
+    }
+  };
+
+  const loadBrands = async () => {
+    try {
+      const response = await brandApi.getAll({ page: 1, limit: 100 });
+      setBrands(response.data?.brands || []);
+    } catch (error) {
+      console.error("Failed to load brands:", error);
+    }
+  };
+
   useEffect(() => {
     if (isEdit && id) {
       loadProduct(id);
     }
   }, [id, isEdit]);
+
+  // Auto-generate SKUs when variants change
+  useEffect(() => {
+    if (formData.variants.length > 0) {
+      const newSkus = generateSKUs(formData.variants);
+      // Only update if SKUs have changed
+      if (
+        JSON.stringify(newSkus.map((s) => s.value)) !==
+        JSON.stringify(formData.skus.map((s) => s.value))
+      ) {
+        // Preserve existing SKU data (price, stock, image) when values match
+        const mergedSkus = newSkus.map((newSku) => {
+          const existingSku = formData.skus.find(
+            (sku) => sku.value === newSku.value,
+          );
+          return existingSku
+            ? {
+                ...newSku,
+                price: existingSku.price,
+                stock: existingSku.stock,
+                image: existingSku.image,
+              }
+            : newSku;
+        });
+        setFormData((prev) => ({ ...prev, skus: mergedSkus }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, skus: [] }));
+    }
+  }, [formData.variants]);
 
   const loadProduct = async (productId: string) => {
     try {
@@ -49,8 +194,11 @@ export function ProductForm() {
         description: product.description || "",
         sizeGuide: product.sizeGuide || "",
         provinceId: product.provinceId,
+        provinceName: product.provinceName,
         districtId: product.districtId,
+        districtName: product.districtName,
         wardId: product.wardId,
+        wardName: product.wardName,
         status: product.status,
         categories: product.categoryIds || [],
         skus:
@@ -235,19 +383,221 @@ export function ProductForm() {
               </div>
             </div>
 
+            {/* Brand Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Brand ID
+                Brand
               </label>
-              <input
-                type="text"
-                value={formData.brandId}
+              <select
+                value={formData.brandId || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, brandId: e.target.value })
                 }
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter brand ID"
-              />
+              >
+                <option value="">Select Brand (Optional)</option>
+                {brands.map((brand) => (
+                  <option key={brand.id} value={brand.id}>
+                    {brand.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Category Selection */}
+            <div className="space-y-4">
+              {/* Level 0 - Main Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Main Category (Level 0) *
+                </label>
+                <select
+                  value={selectedLevel0Category || ""}
+                  onChange={(e) => {
+                    const categoryId = e.target.value;
+                    if (categoryId) {
+                      setSelectedLevel0Category(categoryId);
+                      loadLevel1Categories(categoryId);
+                      setFormData({
+                        ...formData,
+                        categories: [categoryId],
+                      });
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="">Select Main Category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Level 1 - Sub Categories */}
+              {selectedLevel0Category && level1Categories.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Sub Categories (Level 1) - Multiple selection
+                  </label>
+                  <div className="space-y-2 max-h-60 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    {level1Categories.map((category) => (
+                      <label
+                        key={category.id}
+                        className="flex items-center gap-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.categories.includes(category.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({
+                                ...formData,
+                                categories: [
+                                  ...formData.categories,
+                                  category.id,
+                                ],
+                              });
+                            } else {
+                              setFormData({
+                                ...formData,
+                                categories: formData.categories.filter(
+                                  (id) => id !== category.id,
+                                ),
+                              });
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        />
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={category.logo}
+                            alt={category.name}
+                            className="w-6 h-6 rounded object-cover"
+                          />
+                          <span className="text-sm text-gray-900 dark:text-white">
+                            {category.name}
+                          </span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Selected level 1: {formData.categories.length - 1}{" "}
+                    categories
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Location/Address Selection */}
+            <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                Location
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Province Select */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Province/City
+                  </label>
+                  <select
+                    value={formData.provinceId || ""}
+                    onChange={(e) => {
+                      const provinceId = e.target.value
+                        ? parseInt(e.target.value)
+                        : undefined;
+                      const selectedProvince = provinces.find(
+                        (p) => p.id === provinceId,
+                      );
+                      setFormData({
+                        ...formData,
+                        provinceId,
+                        provinceName: selectedProvince?.name,
+                        districtId: undefined,
+                        districtName: undefined,
+                        wardId: undefined,
+                        wardName: undefined,
+                      });
+                    }}
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Province</option>
+                    {provinces.map((province) => (
+                      <option key={province.id} value={province.id}>
+                        {province.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* District Select */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    District
+                  </label>
+                  <select
+                    value={formData.districtId || ""}
+                    onChange={(e) => {
+                      const districtId = e.target.value
+                        ? parseInt(e.target.value)
+                        : undefined;
+                      const selectedDistrict = districts.find(
+                        (d) => d.id === districtId,
+                      );
+                      setFormData({
+                        ...formData,
+                        districtId,
+                        districtName: selectedDistrict?.name,
+                        wardId: undefined,
+                        wardName: undefined,
+                      });
+                    }}
+                    disabled={!formData.provinceId}
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Select District</option>
+                    {districts.map((district) => (
+                      <option key={district.id} value={district.id}>
+                        {district.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Ward Select */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Ward/Commune
+                  </label>
+                  <select
+                    value={formData.wardId || ""}
+                    onChange={(e) => {
+                      const wardId = e.target.value
+                        ? parseInt(e.target.value)
+                        : undefined;
+                      const selectedWard = wards.find((w) => w.id === wardId);
+                      setFormData({
+                        ...formData,
+                        wardId,
+                        wardName: selectedWard?.name,
+                      });
+                    }}
+                    disabled={!formData.districtId}
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Select Ward</option>
+                    {wards.map((ward) => (
+                      <option key={ward.id} value={ward.id}>
+                        {ward.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
 
             <div>
@@ -448,6 +798,89 @@ export function ProductForm() {
             </button>
           </div>
         </div>
+
+        {/* SKUs */}
+        {formData.skus.length > 0 && (
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              SKUs (Auto-generated from Variants)
+            </h2>
+            <div className="space-y-3">
+              {formData.skus.map((sku, index) => (
+                <div
+                  key={index}
+                  className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        SKU Value
+                      </label>
+                      <input
+                        type="text"
+                        value={sku.value}
+                        readOnly
+                        className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Price
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={sku.price}
+                        onChange={(e) => {
+                          const newSkus = [...formData.skus];
+                          newSkus[index].price =
+                            parseFloat(e.target.value) || 0;
+                          setFormData({ ...formData, skus: newSkus });
+                        }}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Stock
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={sku.stock}
+                        onChange={(e) => {
+                          const newSkus = [...formData.skus];
+                          newSkus[index].stock = parseInt(e.target.value) || 0;
+                          setFormData({ ...formData, skus: newSkus });
+                        }}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Image URL
+                      </label>
+                      <input
+                        type="url"
+                        value={sku.image}
+                        onChange={(e) => {
+                          const newSkus = [...formData.skus];
+                          newSkus[index].image = e.target.value;
+                          setFormData({ ...formData, skus: newSkus });
+                        }}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Submit */}
         <div className="flex gap-3">

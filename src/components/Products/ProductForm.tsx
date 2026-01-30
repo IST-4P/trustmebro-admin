@@ -27,7 +27,7 @@ export function ProductForm() {
     provinceId: undefined,
     districtId: undefined,
     wardId: undefined,
-    status: "DRAFT",
+    status: "ACTIVE",
     categories: [],
     skus: [],
     attributes: [],

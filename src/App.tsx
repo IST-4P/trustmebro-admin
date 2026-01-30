@@ -4,6 +4,7 @@ import { Layout } from "./components/Layout";
 import { Dashboard } from "./pages/Dashboard";
 import { Products } from "./pages/Products";
 import { ProductForm } from "./pages/ProductForm";
+import { ProductDetail } from "./pages/ProductDetail";
 import { Orders } from "./pages/Orders";
 import { Notifications } from "./pages/Notifications";
 import { Chat } from "./pages/Chat";
@@ -13,6 +14,7 @@ import { Reports } from "./pages/Reports";
 import { Login } from "./pages/Login";
 import { ForgotPassword } from "./pages/ForgotPassword";
 import { Toaster } from "./components/ui/sonner";
+import { LanguageProvider } from "./contexts/LanguageContext";
 // import { dashboardApi } from "./services/api";
 import { isAuthenticated } from "./utils/auth";
 
@@ -51,43 +53,48 @@ export default function App() {
   };
 
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+    <LanguageProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Shop Route (no layout) */}
-        {/* <Route path="/shop" element={<Shop />} /> */}
+          {/* Shop Route (no layout) */}
+          {/* <Route path="/shop" element={<Shop />} /> */}
 
-        {/* Protected Routes with Layout */}
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-              <Layout
-                unreadNotifications={unreadNotifications}
-                unreadMessages={unreadMessages}
-              >
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/products/create" element={<ProductForm />} />
-                  <Route path="/products/:id" element={<ProductForm />} />
-                  <Route path="/products/:id/edit" element={<ProductForm />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/notifications" element={<Notifications />} />
-                  <Route path="/chat" element={<Chat />} />
-                  <Route path="/videos" element={<Videos />} />
-                  <Route path="/reviews" element={<Reviews />} />
-                  <Route path="/reports" element={<Reports />} />
-                </Routes>
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-      <Toaster />
-    </BrowserRouter>
+          {/* Protected Routes with Layout */}
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <Layout
+                  unreadNotifications={unreadNotifications}
+                  unreadMessages={unreadMessages}
+                >
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/products/create" element={<ProductForm />} />
+                    <Route path="/products/:id" element={<ProductDetail />} />
+                    <Route
+                      path="/products/:id/edit"
+                      element={<ProductForm />}
+                    />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/notifications" element={<Notifications />} />
+                    <Route path="/chat" element={<Chat />} />
+                    <Route path="/videos" element={<Videos />} />
+                    <Route path="/reviews" element={<Reviews />} />
+                    <Route path="/reports" element={<Reports />} />
+                  </Routes>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+        <Toaster />
+      </BrowserRouter>
+    </LanguageProvider>
   );
 }

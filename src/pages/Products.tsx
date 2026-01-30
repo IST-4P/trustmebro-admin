@@ -15,8 +15,10 @@ import type {
   ProductStatus,
   ProductQueryParams,
 } from "../types";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function Products() {
+  const { t } = useLanguage();
   const [products, setProducts] = useState<ProductListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -84,10 +86,10 @@ export function Products() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Products
+            {t.products.title}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage your product catalog ({total} total)
+            {t.products.subtitle} ({total} {t.products.total})
           </p>
         </div>
         <Link
@@ -95,7 +97,7 @@ export function Products() {
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
         >
           <Plus className="w-5 h-5" />
-          Create Product
+          {t.products.createProduct}
         </Link>
       </div>
 
@@ -107,7 +109,7 @@ export function Products() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder={t.products.searchPlaceholder}
               value={filters.name}
               onChange={(e) =>
                 setFilters({ ...filters, name: e.target.value, page: 1 })
@@ -130,11 +132,11 @@ export function Products() {
               }
               className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Status</option>
-              <option value="ACTIVE">Active</option>
-              <option value="INACTIVE">Inactive</option>
-              <option value="DRAFT">Draft</option>
-              <option value="BANNED">Banned</option>
+              <option value="">{t.products.allStatus}</option>
+              <option value="ACTIVE">{t.products.active}</option>
+              <option value="INACTIVE">{t.products.inactive}</option>
+              <option value="DRAFT">{t.products.draft}</option>
+              <option value="BANNED">{t.products.banned}</option>
             </select>
           </div>
         </div>
@@ -147,7 +149,7 @@ export function Products() {
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-gray-600 dark:text-gray-400">
-                Loading products...
+                {t.common.loading}
               </p>
             </div>
           </div>
@@ -155,12 +157,12 @@ export function Products() {
           <div className="flex flex-col items-center justify-center h-64 text-center px-4">
             <Package className="w-12 h-12 text-gray-400 mb-4" />
             <p className="text-gray-900 dark:text-white font-medium">
-              No products found
+              {t.products.noProductsFound}
             </p>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               {filters.name || filters.status
-                ? "Try adjusting your filters"
-                : "Get started by creating your first product"}
+                ? t.products.adjustFilters
+                : t.products.noProductsMessage}
             </p>
           </div>
         ) : (
@@ -169,25 +171,28 @@ export function Products() {
               <thead className="bg-gray-50 dark:bg-gray-800/50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Product
+                    {t.products.product}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Base Price
+                    {t.products.name}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Virtual Price
+                    {t.products.basePrice}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Rating
+                    {t.products.virtualPrice}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Sold
+                    {t.products.rating}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Status
+                    {t.products.sold}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    {t.products.status}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Actions
+                    {t.products.actions}
                   </th>
                 </tr>
               </thead>
@@ -202,7 +207,6 @@ export function Products() {
                         {product.images?.[0] ? (
                           <img
                             src={product.images[0]}
-                            alt={product.name}
                             className="w-12 h-12 rounded-lg object-cover bg-gray-100 dark:bg-gray-800"
                           />
                         ) : (
@@ -210,18 +214,16 @@ export function Products() {
                             <Package className="w-6 h-6 text-gray-400" />
                           </div>
                         )}
-                        <div>
-                          <div className="font-medium text-gray-900 dark:text-white">
-                            {product.name}
-                          </div>
-                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                      ${product.basePrice.toLocaleString()}
+                      {product.name}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                      ${product.virtualPrice.toLocaleString()}
+                      {product.basePrice.toLocaleString()} VND
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                      {product.virtualPrice.toLocaleString()} VND
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">
                       {product.averageRate.toFixed(1)}
@@ -242,21 +244,21 @@ export function Products() {
                         <Link
                           to={`/products/${product.id}`}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                          title="View details"
+                          title={t.products.viewDetails}
                         >
                           <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         </Link>
                         <Link
                           to={`/products/${product.id}/edit`}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                          title="Edit"
+                          title={t.products.edit}
                         >
                           <Edit2 className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         </Link>
                         <button
                           onClick={() => handleDelete(product.id)}
                           className="p-2 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
-                          title="Delete"
+                          title={t.products.delete}
                         >
                           <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
                         </button>
@@ -273,9 +275,11 @@ export function Products() {
         {!loading && total > 0 && (
           <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800 flex items-center justify-between">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Showing {((filters.page || 1) - 1) * (filters.limit || 10) + 1} to{" "}
-              {Math.min((filters.page || 1) * (filters.limit || 10), total)} of{" "}
-              {total} products
+              {t.common.showing}{" "}
+              {((filters.page || 1) - 1) * (filters.limit || 10) + 1}{" "}
+              {t.common.to}{" "}
+              {Math.min((filters.page || 1) * (filters.limit || 10), total)}{" "}
+              {t.common.of} {total} {t.products.title.toLowerCase()}
             </div>
             <div className="flex gap-2">
               <button
@@ -285,7 +289,7 @@ export function Products() {
                 disabled={filters.page === 1}
                 className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Previous
+                {t.common.previous}
               </button>
               <button
                 onClick={() =>
@@ -294,7 +298,7 @@ export function Products() {
                 disabled={(filters.page || 1) * (filters.limit || 10) >= total}
                 className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Next
+                {t.common.next}
               </button>
             </div>
           </div>

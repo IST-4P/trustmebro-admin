@@ -58,5 +58,13 @@ export default defineConfig({
     port: 3000,
     open: true,
     allowedHosts: ["korbin-malacological-densely.ngrok-free.dev"],
+    hmr: {
+      // Use the ngrok domain for HMR when running through ngrok
+      host: process.env.VITE_HMR_HOST || "localhost",
+      protocol: process.env.VITE_HMR_PROTOCOL || "ws",
+      port: process.env.VITE_HMR_PORT
+        ? parseInt(process.env.VITE_HMR_PORT)
+        : 3000,
+    },
   },
 });

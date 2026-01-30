@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Bell, Check, Trash2, Circle } from "lucide-react";
 import { notificationApi } from "../services/api";
 import type { NotificationItem } from "../types";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function Notifications() {
+  const { t } = useLanguage();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSSEConnected, setIsSSEConnected] = useState(false);

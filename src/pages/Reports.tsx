@@ -7,8 +7,10 @@ import type {
   ReportCategory,
   GetReportResponseDto,
 } from "../types";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function Reports() {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState<CreateReportDto>({
     targetId: "",
     targetType: "PRODUCT",

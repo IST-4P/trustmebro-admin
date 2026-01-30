@@ -14,6 +14,7 @@ import {
   X,
   Store,
   User,
+  Languages,
 } from "lucide-react";
 import { GlobalSearch } from "./GlobalSearch";
 import {
@@ -28,6 +29,7 @@ import {
 } from "./ui/alert-dialog";
 import { toast } from "sonner";
 import { logout, getUserEmail } from "../utils/auth";
+import { useLanguage } from "../contexts/LanguageContext";
 
 interface LayoutProps {
   children: ReactNode;
@@ -44,26 +46,27 @@ export function Layout({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const userEmail = getUserEmail() || "Seller";
+  const { language, setLanguage, t } = useLanguage();
 
   const navItems = [
-    { path: "/", icon: LayoutDashboard, label: "Dashboard" },
-    { path: "/products", icon: Package, label: "Products" },
-    { path: "/orders", icon: ShoppingCart, label: "Orders" },
+    { path: "/", icon: LayoutDashboard, label: t.nav.dashboard },
+    { path: "/products", icon: Package, label: t.nav.products },
+    { path: "/orders", icon: ShoppingCart, label: t.nav.orders },
     {
       path: "/notifications",
       icon: Bell,
-      label: "Notifications",
+      label: t.nav.notifications,
       badge: unreadNotifications,
     },
     {
       path: "/chat",
       icon: MessageSquare,
-      label: "Chat",
+      label: t.nav.chat,
       badge: unreadMessages,
     },
-    { path: "/videos", icon: Video, label: "Video" },
-    { path: "/reviews", icon: Star, label: "Reviews" },
-    { path: "/reports", icon: FileText, label: "Reports" },
+    { path: "/videos", icon: Video, label: t.nav.videos },
+    { path: "/reviews", icon: Star, label: t.nav.reviews },
+    { path: "/reports", icon: FileText, label: t.nav.reports },
   ];
 
   const handleLogout = () => {
@@ -157,6 +160,38 @@ export function Layout({
             </div>
 
             <div className="flex items-center gap-3 flex-shrink-0">
+              {/* Language Switcher */}
+              <div className="relative group">
+                <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <Languages className="w-4 h-4" />
+                  <span className="text-sm font-medium uppercase">
+                    {language}
+                  </span>
+                </button>
+                <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                  <button
+                    onClick={() => setLanguage("en")}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg transition-colors ${
+                      language === "en"
+                        ? "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
+                        : ""
+                    }`}
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => setLanguage("vi")}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-lg transition-colors ${
+                      language === "vi"
+                        ? "bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
+                        : ""
+                    }`}
+                  >
+                    Tiếng Việt
+                  </button>
+                </div>
+              </div>
+
               {/* Shop Button */}
               <Link
                 to={`${import.meta.env.VITE_USER_URL || "/"}`}
@@ -211,7 +246,7 @@ export function Layout({
                 <button
                   onClick={() => setShowLogoutDialog(true)}
                   className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                  title="Logout"
+                  title={t.nav.logout}
                 >
                   <LogOut className="w-5 h-5" />
                 </button>

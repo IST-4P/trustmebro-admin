@@ -4,8 +4,10 @@ import { videoApi } from "../services/api";
 import type { VideoItem, VideoStatus, VideoQueryParams } from "../types";
 import { VideoUploadModal } from "../components/VideoUploadModal";
 import { toast } from "sonner";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function Videos() {
+  const { t } = useLanguage();
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [loading, setLoading] = useState(true);

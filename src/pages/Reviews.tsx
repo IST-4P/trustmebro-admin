@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Star, MessageSquare, Edit2, Trash2, Check, X } from "lucide-react";
 import { reviewApi } from "../services/api";
 import type { ReviewItem, ReviewQueryParams } from "../types";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export function Reviews() {
+  const { t } = useLanguage();
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -37,7 +39,7 @@ export function Reviews() {
   };
 
   const handleCreateReply = async (reviewId: string) => {
-    if (!replyContent.trim()) return;
+    if (!replyContent || !replyContent.trim()) return;
 
     try {
       await reviewApi.createReply({ reviewId, content: replyContent });
@@ -52,7 +54,7 @@ export function Reviews() {
   };
 
   const handleUpdateReply = async (replyId: string) => {
-    if (!replyContent.trim()) return;
+    if (!replyContent || !replyContent.trim()) return;
 
     try {
       await reviewApi.updateReply({ id: replyId, content: replyContent });
@@ -141,12 +143,26 @@ export function Reviews() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-medium">
-                        U
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {review.avatar ? (
+                          <img
+                            src={review.avatar}
+                            alt={review.username || "User"}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center text-white font-medium">
+                            {review.username
+                              ? review.username.slice(0, 1).toUpperCase()
+                              : "U"}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white">
-                          {review.username.slice(0, 8)}
+                          {review.username
+                            ? review.username.slice(0, 8)
+                            : "Anonymous"}
                         </p>
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
@@ -165,10 +181,14 @@ export function Reviews() {
                       </div>
                     </div>
                     <p className="text-gray-700 dark:text-gray-300 mb-2">
-                      {review.content}
+                      {review.content || "No content"}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Product: {review.productId.slice(0, 8)}...
+                      Product:{" "}
+                      {review.productId
+                        ? review.productId.slice(0, 8)
+                        : "Unknown"}
+                      ...
                     </p>
                     {review.medias && review.medias.length > 0 && (
                       <div className="flex gap-2 mt-3">
@@ -244,7 +264,7 @@ export function Reviews() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleCreateReply(review.id)}
-                            disabled={!replyContent.trim()}
+                            disabled={!replyContent || !replyContent.trim()}
                             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors"
                           >
                             <Check className="w-4 h-4" />
@@ -279,7 +299,7 @@ export function Reviews() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleUpdateReply(review.reply!.id)}
-                            disabled={!replyContent.trim()}
+                            disabled={!replyContent || !replyContent.trim()}
                             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors"
                           >
                             <Check className="w-4 h-4" />

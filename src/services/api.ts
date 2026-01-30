@@ -29,6 +29,13 @@ import type {
   OrderQueryParams,
   VideoQueryParams,
   ReviewQueryParams,
+  GetProvincesResponseDto,
+  GetDistrictsResponseDto,
+  GetWardsResponseDto,
+  GetAllCategoriesResponseDto,
+  GetCategoryByIdResponseDto,
+  GetAllBrandsResponseDto,
+  GetBrandByIdResponseDto,
 } from "../types";
 
 // Normalize URL by removing trailing slash
@@ -48,6 +55,18 @@ const SOCKET_IO_URL = normalizeUrl(
     SELLER_API_URL.replace(/\/api\/v1$/, "") ||
     "http://localhost:3000",
 );
+
+// Helper function to get access token from cookies
+function getAccessTokenFromCookies(): string | null {
+  const cookies = document.cookie.split(";");
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split("=");
+    if (name === "accessToken") {
+      return value;
+    }
+  }
+  return null;
+}
 
 // Helper function for API calls to seller endpoint
 async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -288,20 +307,24 @@ export const notificationApi = {
 // ============================================================================
 
 export const chatApi = {
-  getMessages: async (params?: {
-    conversationId?: string;
+  getMessages: async (params: {
+    conversationId: string;
     page?: number;
     limit?: number;
   }): Promise<GetAllMessagesResponseDto> => {
-    const queryString = new URLSearchParams(
-      Object.entries(params || {})
-        .filter(([_, v]) => v !== undefined)
-        .map(([k, v]) => [k, String(v)]),
-    ).toString();
+    // Build query string with correct order: page, limit, conversationId
+    const searchParams = new URLSearchParams();
+    if (params.page !== undefined) {
+      searchParams.append("page", String(params.page));
+    }
+    if (params.limit !== undefined) {
+      searchParams.append("limit", String(params.limit));
+    }
+    searchParams.append("conversationId", params.conversationId);
 
-    return apiCall<GetAllMessagesResponseDto>(
-      `/chat/message${queryString ? `?${queryString}` : ""}`,
-    );
+    const queryString = searchParams.toString();
+
+    return apiCall<GetAllMessagesResponseDto>(`/chat/message?${queryString}`);
   },
 
   getConversations: async (params?: {
@@ -365,13 +388,28 @@ export const chatApi = {
   ) => {
     // Dynamically import socket.io-client
     return import("socket.io-client").then(({ io }) => {
-      const socketOptions = {
+      // Get access token from cookies for authentication
+      const accessToken = getAccessTokenFromCookies();
+
+      const socketOptions: any = {
         withCredentials: true,
         transports: ["websocket", "polling"],
         query: {
           conversationId: conversationId,
         },
       };
+
+      // Add authentication if token is available
+      if (
+        accessToken &&
+        accessToken !== "undefined" &&
+        accessToken.trim() !== ""
+      ) {
+        socketOptions.auth = { token: accessToken };
+        socketOptions.extraHeaders = {
+          Authorization: `Bearer ${accessToken}`,
+        };
+      }
 
       // Connect to /message namespace (using SOCKET_IO_URL without /api/v1)
       const socketUrl = `${SOCKET_IO_URL}/message`;
@@ -455,6 +493,14 @@ export const chatApi = {
     // Success will be handled by newMessage listener
     // Store timeout ID to clear it when message arrives
     (socket as any)._messageTimeoutId = timeoutId;
+
+    // Helper to clear timeout when message is confirmed
+    (socket as any)._clearMessageTimeout = () => {
+      if ((socket as any)._messageTimeoutId) {
+        clearTimeout((socket as any)._messageTimeoutId);
+        (socket as any)._messageTimeoutId = null;
+      }
+    };
   },
 };
 
@@ -624,5 +670,75 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ email }),
     });
+  },
+};
+
+// ============================================================================
+// Location API (uses USER API endpoint)
+// ============================================================================
+
+export const locationApi = {
+  getProvinces: async (): Promise<GetProvincesResponseDto> => {
+    return userApiCall<GetProvincesResponseDto>("/location/provinces");
+  },
+
+  getDistricts: async (
+    provinceId: number,
+  ): Promise<GetDistrictsResponseDto> => {
+    return userApiCall<GetDistrictsResponseDto>(
+      `/location/districts/${provinceId}`,
+    );
+  },
+
+  getWards: async (districtId: number): Promise<GetWardsResponseDto> => {
+    return userApiCall<GetWardsResponseDto>(`/location/wards/${districtId}`);
+  },
+};
+
+// ============================================================================
+// Category API (uses USER API endpoint)
+// ============================================================================
+
+export const categoryApi = {
+  getAll: async (params?: {
+    parentCategoryId?: string;
+  }): Promise<GetAllCategoriesResponseDto> => {
+    const queryParams = new URLSearchParams();
+    if (params?.parentCategoryId) {
+      queryParams.append("parentCategoryId", params.parentCategoryId);
+    }
+
+    const queryString = queryParams.toString();
+    const endpoint = queryString ? `/category?${queryString}` : "/category";
+
+    return userApiCall<GetAllCategoriesResponseDto>(endpoint);
+  },
+
+  getById: async (id: string): Promise<GetCategoryByIdResponseDto> => {
+    return userApiCall<GetCategoryByIdResponseDto>(`/category/${id}`);
+  },
+};
+
+// ============================================================================
+// Brand API (uses USER API endpoint)
+// ============================================================================
+
+export const brandApi = {
+  getAll: async (params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<GetAllBrandsResponseDto> => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    const queryString = queryParams.toString();
+    const endpoint = queryString ? `/brand?${queryString}` : "/brand";
+
+    return userApiCall<GetAllBrandsResponseDto>(endpoint);
+  },
+
+  getById: async (id: string): Promise<GetBrandByIdResponseDto> => {
+    return userApiCall<GetBrandByIdResponseDto>(`/brand/${id}`);
   },
 };

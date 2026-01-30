@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { Send, Circle, User, Plus } from "lucide-react";
 import { chatApi } from "../services/api";
 import type { ChatConversation, ChatMessage } from "../types";
+import { useLanguage } from "../contexts/LanguageContext";
+import { getSellerId } from "../utils/auth";
 
 // Helper function to format relative time
 function formatRelativeTime(dateString: string): string {
@@ -20,6 +22,7 @@ function formatRelativeTime(dateString: string): string {
 }
 
 export function Chat() {
+  const { t } = useLanguage();
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [selectedConversation, setSelectedConversation] =
     useState<ChatConversation | null>(null);
@@ -28,10 +31,19 @@ export function Chat() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
-  const [currentSellerId, setCurrentSellerId] = useState<string | null>(null);
+  const [currentSellerId, setCurrentSellerId] = useState<string | null>(() =>
+    getSellerId(),
+  );
   const [showCreateConversation, setShowCreateConversation] = useState(false);
   const [newUserId, setNewUserId] = useState("");
+
+  // Infinite scroll state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(true);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<any>(null);
 
   // Load conversations on mount
@@ -51,13 +63,19 @@ export function Chat() {
       return;
     }
 
+    // Reset pagination state
+    setCurrentPage(1);
+    setHasMoreMessages(true);
+
     // Connect to Socket.IO for the selected conversation
     chatApi
       .connectSocketIO(
         selectedConversation.id,
         (message) => {
-          // Handle new message
-          console.log("[Chat] New message received:", message);
+          // Clear timeout if exists
+          if (socketRef.current?._clearMessageTimeout) {
+            socketRef.current._clearMessageTimeout();
+          }
 
           // Set seller ID from sent messages automatically
           if (!currentSellerId && message.senderId) {
@@ -102,17 +120,12 @@ export function Chat() {
         socketRef.current = socket;
       })
       .catch((error) => {
-        console.error("[Chat] Failed to connect:", error);
+        alert("Failed to connect to chat socket: " + (error as Error).message);
       });
 
     // Cleanup on unmount or conversation change
     return () => {
-      console.log(
-        "[Chat] 🧹 Cleanup triggered for conversation:",
-        selectedConversation?.id,
-      );
       if (socketRef.current) {
-        console.log("[Chat] 🔌 Disconnecting socket...");
         socketRef.current.disconnect();
         socketRef.current = null;
         setIsSocketConnected(false);
@@ -128,58 +141,113 @@ export function Chat() {
       const conversations = response.data?.conversations || [];
       setConversations(Array.isArray(conversations) ? conversations : []);
     } catch (error: any) {
-      console.error("Failed to load conversations:", error);
-      // Handle NotFound as empty data instead of error
       setConversations([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadMessages = async (conversationId: string) => {
+  const loadMessages = async (
+    conversationId: string,
+    page: number = 1,
+    clearMessages: boolean = false,
+  ) => {
+    if (isLoadingMessages || (!hasMoreMessages && !clearMessages)) {
+      return;
+    }
+
     try {
+      setIsLoadingMessages(true);
       const response = await chatApi.getMessages({
         conversationId,
-        page: 1,
-        limit: 100,
+        page,
+        limit: 10,
       });
+
       // Handle response structure: { data: { messages: [...] } }
-      const messages = response.data?.messages || [];
-      // Sort messages by time: oldest first (top), newest last (bottom)
-      const sortedMessages = Array.isArray(messages)
-        ? messages.sort(
-            (a, b) =>
-              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-          )
-        : [];
-      setMessages(sortedMessages);
+      const newMessages = response.data?.messages || [];
+
+      if (newMessages.length === 0) {
+        setHasMoreMessages(false);
+        return;
+      }
+
+      if (clearMessages) {
+        // ========================================
+        // LOAD LẦN ĐẦU (Page 1)
+        // ========================================
+        // API trả: [tin mới nhất, ..., tin cũ] (DESC - createdAt giảm dần)
+        // Cần hiển thị: tin cũ → tin mới (CŨ → MỚI)
+        // => Reverse array và set
+        const sortedMessages = [...newMessages].reverse();
+        setMessages(sortedMessages);
+
+        // Scroll xuống bottom để thấy tin mới nhất
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+        }, 100);
+      } else {
+        // ========================================
+        // LOAD THÊM TIN CŨ (Page 2, 3, 4...)
+        // ========================================
+        // Lưu vị trí scroll hiện tại
+        const container = messagesContainerRef.current;
+        const scrollHeight = container?.scrollHeight || 0;
+        const scrollTop = container?.scrollTop || 0;
+
+        // API trả: [tin mới trong page, ..., tin cũ trong page] (DESC)
+        // Prepend theo thứ tự từ đầu array
+        setMessages((prev) => {
+          // Reverse to get oldest first, then prepend
+          const sortedNewMessages = [...newMessages].reverse();
+          return [...sortedNewMessages, ...prev];
+        });
+
+        // Giữ nguyên vị trí scroll (bù trừ phần tin nhắn mới thêm vào)
+        setTimeout(() => {
+          if (container) {
+            const newScrollHeight = container.scrollHeight;
+            container.scrollTop = scrollTop + (newScrollHeight - scrollHeight);
+          }
+        }, 100);
+      }
+
+      // Nếu số tin nhắn ít hơn limit, không còn tin nhắn nữa
+      if (newMessages.length < 10) {
+        setHasMoreMessages(false);
+      }
 
       // Try to identify seller from participants if not already set
       if (
         !currentSellerId &&
-        Array.isArray(sortedMessages) &&
-        sortedMessages.length > 0 &&
-        selectedConversation
+        selectedConversation &&
+        selectedConversation.participants &&
+        selectedConversation.participants.length >= 2
       ) {
-        // Find seller participant - usually test4 or the second participant
-        const sellerParticipant =
-          selectedConversation.participants?.find(
-            (p) => p.username === "test4",
-          ) || selectedConversation.participants?.[1]; // Fallback to second participant
+        // Seller is typically the second participant (index 1)
+        // First participant (index 0) is usually the customer
+        const sellerParticipant = selectedConversation.participants[1];
 
         if (sellerParticipant) {
           setCurrentSellerId(sellerParticipant.id);
+          // Save to localStorage for future sessions
+          localStorage.setItem("sellerId", sellerParticipant.id);
         }
       }
     } catch (error) {
-      console.error("Failed to load messages:", error);
-      setMessages([]);
+      if (clearMessages) {
+        setMessages([]);
+      }
+    } finally {
+      setIsLoadingMessages(false);
     }
   };
 
   const handleSelectConversation = (conversation: ChatConversation) => {
     setSelectedConversation(conversation);
-    loadMessages(conversation.id);
+    setCurrentPage(1);
+    setHasMoreMessages(true);
+    loadMessages(conversation.id, 1, true);
   };
 
   const handleCreateConversation = async () => {
@@ -204,15 +272,43 @@ export function Chat() {
         loadMessages(response.data.id);
       }
     } catch (error) {
-      console.error("Failed to create conversation:", error);
       alert("Failed to create conversation: " + (error as Error).message);
     }
   };
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll to bottom only when new messages arrive and user is near bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    // Check if user is near bottom (within 200px)
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      200;
+
+    // Only auto-scroll if user is near bottom (viewing latest messages)
+    if (isNearBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
+
+  // Setup scroll listener for infinite scroll
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container || !selectedConversation) return;
+
+    const handleScroll = () => {
+      // Khi scroll lên trên cùng (hoặc gần trên cùng)
+      if (container.scrollTop < 100 && hasMoreMessages && !isLoadingMessages) {
+        const nextPage = currentPage + 1;
+        setCurrentPage(nextPage);
+        loadMessages(selectedConversation.id, nextPage, false);
+      }
+    };
+
+    container.addEventListener("scroll", handleScroll);
+    return () => container.removeEventListener("scroll", handleScroll);
+  }, [selectedConversation, currentPage, hasMoreMessages, isLoadingMessages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -234,9 +330,9 @@ export function Chat() {
           },
           async (error) => {
             // Error/Timeout callback - fallback to REST API
-            console.warn(
-              "[Chat] Socket failed, falling back to REST API:",
-              error,
+            alert(
+              "Socket failed, falling back to REST API: " +
+                (error as Error).message,
             );
             try {
               const newMessage = await chatApi.sendMessage(
@@ -247,10 +343,7 @@ export function Chat() {
               // Set seller ID if not already set
               if (!currentSellerId && newMessage.senderId) {
                 setCurrentSellerId(newMessage.senderId);
-                console.log(
-                  "[Chat] Current seller ID set:",
-                  newMessage.senderId,
-                );
+                alert("Current seller ID set: " + newMessage.senderId);
               }
 
               // Add message to UI
@@ -276,10 +369,13 @@ export function Chat() {
                 );
               });
             } catch (restError) {
-              console.error("[Chat] REST API error:", restError);
               // Note: Server may save message even if POST returns error
               // Message will appear via socket newMessage event
               setMessageInput(content);
+              alert(
+                "Failed to send message via REST API fallback: " +
+                  (restError as Error).message,
+              );
             }
           },
         );
@@ -319,9 +415,9 @@ export function Chat() {
         });
       }
     } catch (error) {
-      console.error("Failed to send message:", error);
       // Restore message input on error
       setMessageInput(content);
+      alert("Failed to send message: " + (error as Error).message);
     } finally {
       setSending(false);
     }
@@ -470,8 +566,20 @@ export function Chat() {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.length === 0 ? (
+                <div
+                  ref={messagesContainerRef}
+                  className="flex-1 overflow-y-auto p-4 space-y-4"
+                >
+                  {isLoadingMessages && currentPage === 1 ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">
+                          Loading messages...
+                        </p>
+                      </div>
+                    </div>
+                  ) : messages.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-center">
                       <p className="text-gray-500 dark:text-gray-400">
                         No messages yet. Start the conversation!
@@ -479,6 +587,25 @@ export function Chat() {
                     </div>
                   ) : (
                     <>
+                      {/* Loading indicator when loading more messages */}
+                      {isLoadingMessages && currentPage > 1 && (
+                        <div className="flex items-center justify-center py-2">
+                          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
+                            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                            Loading older messages...
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Show "No more messages" indicator */}
+                      {!hasMoreMessages && messages.length > 0 && (
+                        <div className="text-center py-2">
+                          <p className="text-xs text-gray-400 dark:text-gray-500">
+                            No more messages
+                          </p>
+                        </div>
+                      )}
+
                       {messages.map((message) => {
                         // Get sender info from participants
                         const sender = selectedConversation?.participants?.find(
@@ -488,9 +615,10 @@ export function Chat() {
 
                         // Determine if message is from current seller
                         // Seller messages should appear on the RIGHT (isOwnMessage = true)
+                        // Compare senderId with currentSellerId to identify seller's messages
                         const isOwnMessage = currentSellerId
                           ? message.senderId === currentSellerId
-                          : sender?.username === "test4";
+                          : false;
 
                         return (
                           <div

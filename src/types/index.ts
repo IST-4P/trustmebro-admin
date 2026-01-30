@@ -91,7 +91,49 @@ export interface ProductCategory {
   id: string;
   name: string;
   logo: string;
+  level?: number;
   parentCategoryId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Brand DTOs
+export interface Brand {
+  id: string;
+  name: string;
+  logo: string;
+  soldCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GetAllBrandsData {
+  brands: Brand[];
+  page?: number;
+  limit?: number;
+  totalItems?: number;
+  totalPages?: number;
+}
+
+export interface GetAllBrandsResponseDto {
+  data: GetAllBrandsData;
+}
+
+export interface GetBrandByIdResponseDto {
+  data: Brand;
+}
+
+// Category DTOs
+export interface GetAllCategoriesData {
+  categories: ProductCategory[];
+}
+
+export interface GetAllCategoriesResponseDto {
+  data: GetAllCategoriesData;
+}
+
+export interface GetCategoryByIdResponseDto {
+  data: ProductCategory;
 }
 
 // Product list item (from GetProducts)
@@ -128,9 +170,14 @@ export interface ProductDetail {
   name: string;
   description: string;
   provinceId: number;
+  provinceName: string;
   districtId: number;
+  districtName: string;
   wardId: number;
+  wardName: string;
   brandId?: string;
+  brandName?: string;
+  brandLogo?: string;
   categoryIds: string[];
   categories: ProductCategory[];
   basePrice: number;
@@ -144,6 +191,7 @@ export interface ProductDetail {
   variants: ProductVariant[];
   attributes: ProductAttribute[];
   skus: ProductSku[];
+  reviewIds: string[];
   ratingCount: number;
   averageRate: number;
   soldCount: number;
@@ -176,8 +224,11 @@ export interface CreateProductDto {
   description?: string;
   sizeGuide?: string;
   provinceId?: number;
+  provinceName?: string;
   districtId?: number;
+  districtName?: string;
   wardId?: number;
+  wardName?: string;
   status: ProductStatus;
   categories: string[];
   skus: CreateProductSku[];
@@ -192,6 +243,7 @@ export interface UpdateProductDto extends Partial<CreateProductDto> {
 // Order DTOs
 export interface OrderListItem {
   id: string;
+  code: string;
   shopId: string;
   shopName: string;
   status: string;
@@ -199,6 +251,7 @@ export interface OrderListItem {
   grandTotal: number;
   firstProductImage: string;
   firstProductName: string;
+  createdAt: string;
 }
 
 export interface GetAllOrdersData {
@@ -594,4 +647,35 @@ export interface ReviewQueryParams {
   rating?: number;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+}
+
+// Location DTOs
+export interface Province {
+  id: number;
+  name: string;
+}
+
+export interface District {
+  id: number;
+  name: string;
+  provinceId: number;
+}
+
+export interface Ward {
+  id: number;
+  name: string;
+  districtId: number;
+  provinceId: number;
+}
+
+export interface GetProvincesResponseDto {
+  data: Province[];
+}
+
+export interface GetDistrictsResponseDto {
+  data: District[];
+}
+
+export interface GetWardsResponseDto {
+  data: Ward[];
 }
